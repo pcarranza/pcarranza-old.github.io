@@ -3,6 +3,12 @@
   
   
   <url>
+    <loc>http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup/</loc>
+    <lastmod>2014-07-27T12:57:19-04:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://pcarranza.github.io/blog/2014/06/21/about-code-coverage/</loc>
     <lastmod>2014-06-21T21:19:00-04:00</lastmod>
     <priority>0.8</priority>
@@ -17,14 +23,14 @@
   
   <url>
     <loc>http://pcarranza.github.io/blog/archives/</loc>
-    <lastmod>2014-07-27T11:56:15-04:00</lastmod>
+    <lastmod>2014-07-27T13:27:39-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://pcarranza.github.io/</loc>
-    <lastmod>2014-07-27T11:56:15-04:00</lastmod>
+    <lastmod>2014-07-27T13:27:39-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>

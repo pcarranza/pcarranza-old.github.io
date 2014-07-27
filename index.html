@@ -9,7 +9,11 @@
   <meta name="author" content="Pablo C">
 
   
-  <meta name="description" content="On the previous post I was talking about legacy code, considering legacy code as any code that has no tests. As an excercise I was going to recover &hellip;">
+  <meta name="description" content="An HTPC with RhythmBox installed in it
+An AMP with a pair of speakers,
+A DAC
+A mobile phone with a browser.
+A pulse audio specific configuration to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +72,66 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/07/27/rhythmweb-the-setup/">Rhythmweb, the Setup</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-27T12:57:19-04:00" pubdate data-updated="true">2014-07-27</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>An <a href="http://blog.codinghorror.com/revisiting-the-home-theater-pc/">HTPC</a> with <a href="https://wiki.gnome.org/Apps/Rhythmbox">RhythmBox</a> installed in it</li>
+<li>An <a href="http://www.whathifi.com/yamaha/s500/review">AMP</a> with a pair of <a href="http://www.whathifi.com/monitor-audio/bronze-bx2/review">speakers</a>,</li>
+<li>A <a href="http://hifimediy.com/index.php?route=product/product&amp;product_id=83">DAC</a></li>
+<li>A mobile phone with a browser.</li>
+<li>A pulse audio specific configuration to duplicate the output, analog and DAC (adding HDMI is a small tweak):</li>
+</ul>
+
+
+<figure class='code'><figcaption><span>/etc/pulse/default.pa</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="na">load-module module-combine-sink sink_name</span><span class="o">=</span><span class="s">combined slaves=alsa_output.pci-0000_00_1b.0.analog-stereo,alsa_output.usb-HiFimeDIY_Audio_SA9023_USB_Audio-01-Audio.analog-stereo</span>
+</span><span class='line'><span class="err">set-default-sink</span> <span class="err">combined</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Total spent budget, assuming you already have the HTPC and the mobile phone: 756€</p>
+
+<p>Then you can pick what your player is going to play using your mobile phone, without reaching a keyboard, a mouse or a screen.</p>
+
+<p>You can skip the DAC if you don&rsquo;t care that much about sound, but if don&rsquo;t care too much about sound, you can skip the whole project.</p>
+
+<p>Originally this was built on top of a Mac Mini G4 without the DAC, but time passes and improvements arrive.</p>
+
+<p>Enjoy</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Rhythmweb | Random Thoughts]]></title>
+  <link href="http://pcarranza.github.io/blog/categories/rhythmweb/atom.xml" rel="self"/>
+  <link href="http://pcarranza.github.io/"/>
+  <updated>2014-07-27T13:27:39-04:00</updated>
+  <id>http://pcarranza.github.io/</id>
+  <author>
+    <name><![CDATA[Pablo C]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Rhythmweb, the Setup]]></title>
+    <link href="http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup/"/>
+    <updated>2014-07-27T12:57:19-04:00</updated>
+    <id>http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup</id>
+    <content type="html"><![CDATA[<ul>
+<li>An <a href="http://blog.codinghorror.com/revisiting-the-home-theater-pc/">HTPC</a> with <a href="https://wiki.gnome.org/Apps/Rhythmbox">RhythmBox</a> installed in it</li>
+<li>An <a href="http://www.whathifi.com/yamaha/s500/review">AMP</a> with a pair of <a href="http://www.whathifi.com/monitor-audio/bronze-bx2/review">speakers</a>,</li>
+<li>A <a href="http://hifimediy.com/index.php?route=product/product&amp;product_id=83">DAC</a></li>
+<li>A mobile phone with a browser.</li>
+<li>A pulse audio specific configuration to duplicate the output, analog and DAC (adding HDMI is a small tweak):
+<code>ini /etc/pulse/default.pa
+load-module module-combine-sink sink_name=combined slaves=alsa_output.pci-0000_00_1b.0.analog-stereo,alsa_output.usb-HiFimeDIY_Audio_SA9023_USB_Audio-01-Audio.analog-stereo
+set-default-sink combined
+</code></li>
+</ul>
+
+
+<p>Total spent budget, assuming you already have the HTPC and the mobile phone: 756€</p>
+
+<p>Then you can pick what your player is going to play using your mobile phone, without reaching a keyboard, a mouse or a screen.</p>
+
+<p>You can skip the DAC if you don&rsquo;t care that much about sound, but if don&rsquo;t care too much about sound, you can skip the whole project.</p>
+
+<p>Originally this was built on top of a Mac Mini G4 without the DAC, but time passes and improvements arrive.</p>
+
+<p>Enjoy</p>
+]]></content>
+  </entry>
+  
+</feed>
