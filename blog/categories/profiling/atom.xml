@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Profiling | Random Thoughts]]></title>
+  <link href="http://pcarranza.github.io/blog/categories/profiling/atom.xml" rel="self"/>
+  <link href="http://pcarranza.github.io/"/>
+  <updated>2014-08-17T11:31:00-04:00</updated>
+  <id>http://pcarranza.github.io/</id>
+  <author>
+    <name><![CDATA[Pablo C]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Glue Overhead and Real Processing]]></title>
+    <link href="http://pcarranza.github.io/blog/2014/08/14/glue-overhead-and-real-processing/"/>
+    <updated>2014-08-14T14:38:39-04:00</updated>
+    <id>http://pcarranza.github.io/blog/2014/08/14/glue-overhead-and-real-processing</id>
+    <content type="html"><![CDATA[<p>I was on vacation, little to no connectivity, I just needed to learn something new, I needed to code something.</p>
+
+<p>Using my phone I downloaded the source code from <a href="https://github.com/sjl/learnvimscriptthehardway/">learn VimScript the hard way</a>; the book.</p>
+
+<p>It was all markdown, and I did not wanted to read no markdown, so I created a very simple <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-sh">bash script</a> to convert this code into html using <a href="https://github.com/davidfstr/rdiscount">rdiscount</a> which happened to be installed in my host.</p>
+
+<p>Executing it in my laptop took something like 11 seconds (5 seconds in my linux host), that is a lot for a markdown to html transformation of 57 files. And there is where I got distracted.</p>
+
+<h3>Without the glue</h3>
+
+<p>It was way too much. I implemented the same thing <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-rb">using ruby all along</a></p>
+
+<p>And this second implementation took less than a second of execution time.</p>
+
+<h2>Let&rsquo;s get some data</h2>
+
+<p>First let&rsquo;s use /usr/bin/time to try to understand what is going on:</p>
+
+<p><code>/usr/bin/time --verbose ../../bash_convert.sh</code></p>
+
+<p><code>
+User time (seconds): 4.88
+System time (seconds): 0.56
+Percent of CPU this job got: 97%
+Elapsed (wall clock) time (h:mm:ss or m:ss): 0:05.60
+...
+</code></p>
+
+<p><code>/usr/bin/time --verbose ruby1.9.3 ../../convert.rb</code></p>
+
+<p><code>
+User time (seconds): 0.09
+System time (seconds): 0.02
+Percent of CPU this job got: 94%
+Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.12
+...
+</code></p>
+
+<p>The time difference is tremendous, let&rsquo;s dive a bit to figure out what is actually going on.</p>
+
+<h2>Profiling with strace</h2>
+
+<p>Strace itself will create a bit of overhead, lets start by running the command with a <code>time</code> up front to capture all the input in one file.</p>
+
+<p><code>/usr/bin/time --verbose strace -r -f executable 2&gt; bc.strace.out</code> will record time while running strace with relative timestamps, also recording subprocesses system calls, then write all the output in the file bc.strace.out</p>
+
+<p>At the bottom we will find the time output section:</p>
+
+<p><code>
+Command being timed: "strace -r -f ../../bash_convert.sh"
+User time (seconds): 5.97
+System time (seconds): 3.53
+Percent of CPU this job got: 98%
+Elapsed (wall clock) time (h:mm:ss or m:ss): 0:09.69
+</code></p>
+
+<p>The overhead of catching all the systems calls is around 2 more seconds.</p>
+
+<p>This is what strace output looks like:</p>
+
+<p>```</p>
+
+<pre><code> 0.000000 open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+ 0.000147 open("/lib/x86_64-linux-gnu/libtinfo.so.5", O_RDONLY|O_CLOEXEC) = 3
+ 0.000175 open("/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
+ 0.000171 open("/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+ 0.000565 open("/dev/tty", O_RDWR|O_NONBLOCK) = 3
+ 0.000147 open("/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
+ 0.000299 open("/proc/meminfo", O_RDONLY|O_CLOEXEC) = 3
+ 0.000485 open("/usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache", O_RDONLY) = 3
+ 0.000653 open("../../bc.sh", O_RDONLY) = 3
+</code></pre>
+
+<p>Process 16661 attached
+[pid 16661]      0.002270 open(&ldquo;/etc/ld.so.cache&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16661]      0.000105 open(&ldquo;/lib/x86_64-linux-gnu/libselinux.so.1&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16661]      0.000233 open(&ldquo;/lib/x86_64-linux-gnu/librt.so.1&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16661]      0.000175 open(&ldquo;/lib/x86_64-linux-gnu/libacl.so.1&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16661]      0.000183 open(&ldquo;/lib/x86_64-linux-gnu/libc.so.6&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16661]      0.000176 open(&ldquo;/lib/x86_64-linux-gnu/libdl.so.2&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16661]      0.000159 open(&ldquo;/lib/x86_64-linux-gnu/libpthread.so.0&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16661]      0.000200 open(&ldquo;/lib/x86_64-linux-gnu/libattr.so.1&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16661]      0.000762 open(&ldquo;/proc/filesystems&rdquo;, O_RDONLY) = 3
+[pid 16661]      0.000219 open(&ldquo;/usr/lib/locale/locale-archive&rdquo;, O_RDONLY|O_CLOEXEC) = 3
+[pid 16660]      0.002030 wait4(-1, Process 16660 suspended
+Process 16660 resumed
+Process 16661 detached
+[{WIFEXITED(s) &amp;&amp; WEXITSTATUS(s) == 0}], 0, NULL) = 16661</p>
+
+<pre><code> 0.000224 --- SIGCHLD (Child exited) @ 0 (0) ---
+ 0.000036 wait4(-1, 0x7fffc1760f18, WNOHANG, NULL) = -1 ECHILD (No child processes)
+</code></pre>
+
+<p>```</p>
+
+<p>And it goes on long.</p>
+
+<h2>Pre-processing</h2>
+
+<p>Looking at the trace file we will need to do some processing to split the main process and subprocesses output, as the main process is the bash script execution and the subprocesses are ruby executions.</p>
+
+<p>This is what I did to split those two results:</p>
+
+<p>All that starts with the time measurement belongs to the main process</p>
+
+<p><code>grep -e '^ \+[0-9\.]\+ ' bc.strace.out | sed -e 's/^ *//g' &gt; bc.st.mp.out</code></p>
+
+<p>All that starts with <code>[pid xxxx]</code> belongs to a subprocess, also remove the starting pid part</p>
+
+<p><code>grep -e '^\[pid [0-9]\+\]' bc.strace.out | sed -e 's/^\[pid [0-9]\+\] *//g' &gt; bc.st.sp.out</code></p>
+
+<p>We will need some regex processing, define this:</p>
+
+<p><code>function regex { gawk 'match($0,/'$1'/, ary) {print ary['${2:-'0'}']}'; }</code></p>
+
+<h3>And now some questions with the data</h3>
+
+<p>How much time does the main process takes to execute?</p>
+
+<p><code>cat bc.st.mp.out | gawk '{ sum += $1 } END { print sum }'</code>: 0.116901 seconds</p>
+
+<p>How much time does all the subprocesses take to execute?</p>
+
+<p><code>cat bc.st.sp.out | gawk '{ sum += $1 } END { print sum }'</code>: 9.57473 seconds</p>
+
+<p>Where does the time go in execution calls in the main process?</p>
+
+<p><code>for syscall in $(cat bc.st.mp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq); do t=$(grep -e "$syscall" bc.st.mp.out | awk '{ sum += $1 } END { printf("%.6f", sum) }') ; echo $t $syscall; done | sort -gr</code></p>
+
+<p><code>
+0.052399 wait4
+0.028265 rt_sigprocmask
+0.009249 write
+0.007297 brk
+0.002603 rt_sigaction
+0.002481 stat
+0.002456 clone
+0.001792 rt_sigreturn
+0.001109 mmap
+0.000966 read
+0.000877 open
+0.000798 mprotect
+0.000737 close
+...
+</code></p>
+
+<p>But how many times each of these functions are being called?</p>
+
+<p><code>cat bc.st.mp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq -c | sort -gr</code></p>
+
+<p><code>
+244 rt_sigprocmask
+114 write
+67 rt_sigaction
+59 wait4
+58 rt_sigreturn
+58 clone
+16 brk
+15 mmap
+13 read
+10 stat
+10 close
+9 open
+...
+</code></p>
+
+<p>And what about subprocesses?</p>
+
+<p><code>for syscall in $(cat bc.st.sp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq); do t=$(grep -e "$syscall" bc.st.sp.out | awk '{ sum += $1 } END { printf("%.6f", sum) }') ; echo $t $syscall; done | sort -gr</code></p>
+
+<p><code>
+5.164169 stat
+1.204976 open
+1.160715 read
+0.798758 fstat
+0.489750 brk
+0.295447 close
+0.256523 ioctl
+0.251957 lstat
+0.187970 lseek
+0.108561 exit_group
+0.102944 mmap
+0.085621 mprotect
+0.071114 rt_sigaction
+0.061000 getrlimit
+0.060410 rt_sigprocmask
+0.046956 write
+</code></p>
+
+<p><code>
+19790 fstat
+15174 stat
+14602 open
+13177 read
+7940 close
+5930 ioctl
+5244 lstat
+5016 lseek
+2534 mmap
+2149 brk
+1555 mprotect
+1325 rt_sigaction
+...
+115 write
+...
+57 wait4
+</code></p>
+
+<h2>The main process waits, subprocesses open files</h2>
+
+<p>It is what strace shows, the main process spends about half of the time waiting on subprocesses.</p>
+
+<p>Those subprocesses spend most of the time checking file status (stat and fstat, which are being accounted as user time) and then opening and reading files. Which basically is waiting too.</p>
+
+<p>Taking a look at what files are being open in the subprocesses:</p>
+
+<p><code>grep open bc.st.sp.out | sed -e 's/^[0-9\.]\+ //' | sort | uniq -c | sort -gr</code></p>
+
+<p>We will find the ruby environment (about 140 files in this particular case), is being loaded at least 57 times, one per file to convert. This loading is roughly 0.1461 seconds per environment the main process needs to load.</p>
+
+<h3>Conclusions</h3>
+
+<p>This testing answers one of those questions: how heavy is heavy when we talk about interpreted languages like ruby or python.</p>
+
+<p>Loading a full ruby environment is something really heavy and should be taken into consideration if we ever need to do a repetitive task like this one. Going back to the beginning processing all the files in one only environment takes less than the average time it is needed to load it 57 times. And there is an IPC overhead that should also be accounted.</p>
+
+<p>I would never take this as <code>the law</code> or a definite answer, and I will keep using bash for quick dirty hacks or stream processing like I&rsquo;ve done in this very post, glueing cat, grep, sed and awk to parse the data. But if I ever need to automate a task that will be executed many times a day this glue overhead may be too much.</p>
+
+<p>And finally, <code>strace</code> <strong>rocks</strong> big time.</p>
+]]></content>
+  </entry>
+  
+</feed>
