@@ -1,0 +1,441 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Confident and Readable Code - Pablo C</title>
+  <meta name="author" content="Pablo C">
+
+  
+  <meta name="description" content="The interesting thing about learning a new language is not learning the syntax but
+stretching the mind into a new way of thinking. A new point of &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pcarranza.github.io/blog/2014/10/12/confident-and-readable-code">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Pablo C" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='//fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='//fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-55532910-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Pablo C</a></h1>
+  
+    <h2>pbl0c</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscription">
+  <li><a href="https://github.com/pcarranza" rel="subscribe-github" title="@pcarranza on GitHub">GitHub</a></li>
+</ul>
+  
+  
+  
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:pcarranza.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Confident and Readable Code</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-12T14:27:15-04:00" pubdate data-updated="true">2014-10-12</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>The interesting thing about learning a new language is not learning the syntax but
+stretching the mind into a new way of thinking. A new point of view which in the long run
+will provide a much wider view and probably a new tool set which can then be ported back
+into whatever you are doing right now.</p>
+
+<p>While learning ruby, I ended up reading <a href="http://confidentruby.com">Confident Ruby</a> by
+<a href="http://avdi.org">Avdi Grimm</a></p>
+
+<p>This book introduces the concept of timid code in which <em>&ldquo;the different parts of the method are
+mixed up. Some input is collected, then some error handling, then some more input
+collection, then work is done, and so on.&rdquo;</em></p>
+
+<p>It also explains really well the idea of duck typing and object orientation in general,
+that is, forget about asking for the type of an object (endless visitor patterns, or
+worse: instance of) <strong>are you a duck?</strong>, but rather ask what the object can do: <strong>can you quack?</strong></p>
+
+<p>Awesome, go get it, I learned a lot.</p>
+
+<p>This book is a great follow up for <a href="http://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship">clean code</a>
+which is very Java-ish, and does not port so well to dynamic languages like ruby or python.</p>
+
+<p>In Confident Ruby Avdi explains a lot of different patters that can be used to improve the
+code focusing on the story: a method has to tell a story, and as such, it has to have 4
+main blocks:</p>
+
+<ul>
+<li>collect input</li>
+<li> perform work</li>
+<li>deliver result</li>
+<li>handle failures</li>
+</ul>
+
+
+<p>This is a really interesting structure to keep in mind, how messy is my code and how much
+can I gain from writing my code in such way?</p>
+
+<h2>A bit of self-criticism</h2>
+
+<p>Check this gist:</p>
+
+<div><script src='https://gist.github.com/64f77136549ca7422574.js?file=load_id_rsa.rb'></script>
+<noscript><pre><code>def load_rsa_key(key)
+  case key
+    when nil
+      raise ArgumentError, &quot;Key cannot be nil&quot;
+    when OpenSSL::PKey::PKey
+      key
+    when String, File, IO
+      text = read_file(key)
+      if text =~ /^ssh-rsa/
+        load_ssh_pubkey text
+      else
+        OpenSSL::PKey.read text
+      end
+    end
+end
+
+private 
+
+def load_ssh_pubkey(text)
+  rsakey = OpenSSL::PKey::RSA.new
+  text.lines.each do |line|
+    base64 = line.chomp.split[1]
+    keydata = base64.unpack(&quot;m&quot;).first
+    parts = Array.new
+    while (keydata.length &gt; 0)
+      dlen = keydata[0, 4].bytes.inject(0) do |a, b|
+        (a &lt;&lt; 8) + b
+      end
+      data = keydata[4, dlen]
+      keydata = keydata[(dlen + 4)..-1]
+      parts.push(data)
+    end
+    type = parts[0]
+    raise ArgumentError, &quot;Unsupported key type #{type}&quot; unless type == &quot;ssh-rsa&quot;
+    e = parts[1].bytes.inject do |a, b|
+      (a &lt;&lt; 8) + b
+    end
+    n = parts[2].bytes.inject do |a, b|
+      (a &lt;&lt; 8) + b
+    end
+    rsakey.n = n
+    rsakey.e = e
+  end
+  rsakey
+end
+
+def read_file file
+  f = open_file file, &#39;r&#39;
+  f.read
+end
+  
+def open_file file, mode
+  case file
+  when String
+    File.open file, mode
+  when File, IO
+    file
+  else
+    raise ArgumentError, &quot;Invalid file #{file}&quot;
+  end
+end</code></pre></noscript></div>
+
+
+<p>Focus on one function <code>load_ssh_pubkey</code>. It does a non trivial thing
+(at least not for me) which is parsing and building a
+RSA public key from an ssh key.</p>
+
+<p>It works. But the problem here is that it is really hard to follow, the fact that the key
+loading part is using a <em>while there is data to be read</em> does not state with clarity how long
+the reading is going to happen.</p>
+
+<p>There are many <em>byte.injects</em>, one that starts explicitly in 0, the others don&rsquo;t, but why?.
+It is also assuming that more than one line is going to be read from the file/text, but the
+function will return only the last one, which is not clearly stated.</p>
+
+<p>It also checks if the key type is ssh-rsa, which is also checked in the caller
+method, right in the middle of the parsing part, where work is being performed.</p>
+
+<p>And then finally it builds the key to deliver it back.</p>
+
+<p>It is really hard to follow. This code is not telling a story, it is surviving the input
+data, delivering a key as a side effect if it is not killed in the way.</p>
+
+<p>It is not clean code at all.</p>
+
+<h2> Let&rsquo;s try again</h2>
+
+<p>Extracted from the <em>rebuild</em> branch:</p>
+
+<div><script src='https://gist.github.com/a3e8b58418bbe03af518.js?file=ssh_key.rb'></script>
+<noscript><pre><code>class SSHKey
+
+  attr_reader :rsa
+
+  def initialize(args={})
+    source_file = args.fetch(:file) { fail ArgumentError, &quot;Filename is required&quot; }
+    source = if source_file.respond_to?(:read)
+               source_file.read()
+             else
+               File.open(source_file) do |file|
+                 file.read()
+               end
+             end
+    @rsa = load_ssh_rsa_key(source)
+    @rsa ||= OpenSSL::PKey.read(source)
+  end
+
+  private
+
+  def load_ssh_rsa_key(source)
+    fail &quot;DSA is not supported&quot; if source =~ /^ssh-dsa/
+    return nil unless source =~ /^ssh-rsa/
+
+    keydata = decode_key(source)
+
+    skip_key_type_length = parse_data(keydata.slice!(0, 4))
+    keydata.slice!(0, skip_key_type_length)
+
+    rsakey = OpenSSL::PKey::RSA.new
+    exponent_length = parse_data(keydata.slice!(0, 4))
+    rsakey.e = parse_data(keydata.slice!(0, exponent_length))
+
+    modulus_length = parse_data(keydata.slice!(0, 4))
+    rsakey.n = parse_data(keydata.slice!(0, modulus_length))
+
+    @rsa = rsakey
+  end
+
+  def decode_key(source)
+    base64 = source.chomp.split[1]
+    keydata = base64.unpack(&quot;m&quot;).first
+    keydata
+  end
+
+  def parse_data(data)
+    data.bytes.inject(0) do |sum, byte|
+      (sum &lt;&lt; 8) + byte
+    end
+  end
+
+end</code></pre></noscript></div>
+
+
+<p>In this case I&rsquo;m trying to follow Avdi&rsquo;s ideas: readability and telling a story matters.
+Given that I&rsquo;m in the process of turning this <a href="https://github.com/pcarranza/zssl">console tool</a>
+into a gem that I can actually export I prefer creating an object that will know how to
+handle this ssh key loading instead of a function in a module.</p>
+
+<p>Let&rsquo;s check what goes on in the <code>load_ssh_rsa_key</code> method:</p>
+
+<ul>
+<li>It fails if it gets an DSA key because it is not supported.</li>
+<li>The key is decoded in another method.</li>
+<li>There are 3 chunks of data: key type, exponent and modulus.</li>
+<li>The first 4 bytes are the size of the chunk data.</li>
+<li>With that we can build an RSA key, and that is how it is stored in the ssh key file.</li>
+</ul>
+
+
+<p>Much, much better, I can understand what it does in one read, there are no surprises in that code.</p>
+
+<p>Thanks Avdi.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Authored by <span class="fn">Pablo C</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-12T14:27:15-04:00" pubdate data-updated="true">2014-10-12</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/book/'>book</a>, <a class='category' href='/blog/categories/coding/'>coding</a>, <a class='category' href='/blog/categories/confidence/'>confidence</a>, <a class='category' href='/blog/categories/learning/'>learning</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://pcarranza.github.io/blog/2014/10/12/confident-and-readable-code/" data-via="pbl0c" data-counturl="http://pcarranza.github.io/blog/2014/10/12/confident-and-readable-code/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/08/14/glue-overhead-and-real-processing/" title="Previous Post: Glue overhead and real processing">&laquo; Glue overhead and real processing</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Pablo C -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'pcarranza';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pcarranza.github.io/blog/2014/10/12/confident-and-readable-code/';
+        var disqus_url = 'http://pcarranza.github.io/blog/2014/10/12/confident-and-readable-code/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
