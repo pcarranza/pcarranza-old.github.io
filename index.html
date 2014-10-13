@@ -123,206 +123,12 @@ stretching the mind into a new way of thinking. A new point of view which in the
 will provide a much wider view and probably a new tool set which can then be ported back
 into whatever you are doing right now.</p>
 
-<p>While learning ruby, I ended up reading <a href="http://confidentruby.com">Confident Ruby</a> by
-<a href="http://avdi.org">Avdi Grimm</a></p>
-
-<p>This book introduces the concept of timid code in which <em>&ldquo;the different parts of the method are
-mixed up. Some input is collected, then some error handling, then some more input
-collection, then work is done, and so on.&rdquo;</em></p>
-
-<p>It also explains really well the idea of duck typing and object orientation in general,
-that is, forget about asking for the type of an object (endless visitor patterns, or
-worse: instance of) <strong>are you a duck?</strong>, but rather ask what the object can do: <strong>can you quack?</strong></p>
-
-<p>Awesome, go get it, I learned a lot.</p>
-
-<p>This book is a great follow up for <a href="http://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship">clean code</a>
-which is very Java-ish, and does not port so well to dynamic languages like ruby or python.</p>
-
-<p>In Confident Ruby Avdi explains a lot of different patters that can be used to improve the
-code focusing on the story: a method has to tell a story, and as such, it has to have 4
-main blocks:</p>
-
-<ul>
-<li>collect input</li>
-<li> perform work</li>
-<li>deliver result</li>
-<li>handle failures</li>
-</ul>
-
-
-<p>This is a really interesting structure to keep in mind, how messy is my code and how much
-can I gain from writing my code in such way?</p>
-
-<h2>A bit of self-criticism</h2>
-
-<p>Check this gist:</p>
-
-<div><script src='https://gist.github.com/64f77136549ca7422574.js?file=load_id_rsa.rb'></script>
-<noscript><pre><code>def load_rsa_key(key)
-  case key
-    when nil
-      raise ArgumentError, &quot;Key cannot be nil&quot;
-    when OpenSSL::PKey::PKey
-      key
-    when String, File, IO
-      text = read_file(key)
-      if text =~ /^ssh-rsa/
-        load_ssh_pubkey text
-      else
-        OpenSSL::PKey.read text
-      end
-    end
-end
-
-private 
-
-def load_ssh_pubkey(text)
-  rsakey = OpenSSL::PKey::RSA.new
-  text.lines.each do |line|
-    base64 = line.chomp.split[1]
-    keydata = base64.unpack(&quot;m&quot;).first
-    parts = Array.new
-    while (keydata.length &gt; 0)
-      dlen = keydata[0, 4].bytes.inject(0) do |a, b|
-        (a &lt;&lt; 8) + b
-      end
-      data = keydata[4, dlen]
-      keydata = keydata[(dlen + 4)..-1]
-      parts.push(data)
-    end
-    type = parts[0]
-    raise ArgumentError, &quot;Unsupported key type #{type}&quot; unless type == &quot;ssh-rsa&quot;
-    e = parts[1].bytes.inject do |a, b|
-      (a &lt;&lt; 8) + b
-    end
-    n = parts[2].bytes.inject do |a, b|
-      (a &lt;&lt; 8) + b
-    end
-    rsakey.n = n
-    rsakey.e = e
-  end
-  rsakey
-end
-
-def read_file file
-  f = open_file file, &#39;r&#39;
-  f.read
-end
-  
-def open_file file, mode
-  case file
-  when String
-    File.open file, mode
-  when File, IO
-    file
-  else
-    raise ArgumentError, &quot;Invalid file #{file}&quot;
-  end
-end</code></pre></noscript></div>
-
-
-<p>Focus on one function <code>load_ssh_pubkey</code>. It does a non trivial thing
-(at least not for me) which is parsing and building a
-RSA public key from an ssh key.</p>
-
-<p>It works. But the problem here is that it is really hard to follow, the fact that the key
-loading part is using a <em>while there is data to be read</em> does not state with clarity how long
-the reading is going to happen.</p>
-
-<p>There are many <em>byte.injects</em>, one that starts explicitly in 0, the others don&rsquo;t, but why?.
-It is also assuming that more than one line is going to be read from the file/text, but the
-function will return only the last one, which is not clearly stated.</p>
-
-<p>It also checks if the key type is ssh-rsa, which is also checked in the caller
-method, right in the middle of the parsing part, where work is being performed.</p>
-
-<p>And then finally it builds the key to deliver it back.</p>
-
-<p>It is really hard to follow. This code is not telling a story, it is surviving the input
-data, delivering a key as a side effect if it is not killed in the way.</p>
-
-<p>It is not clean code at all.</p>
-
-<h2> Let&rsquo;s try again</h2>
-
-<p>Extracted from the <em>rebuild</em> branch:</p>
-
-<div><script src='https://gist.github.com/a3e8b58418bbe03af518.js?file=ssh_key.rb'></script>
-<noscript><pre><code>class SSHKey
-
-  attr_reader :rsa
-
-  def initialize(args={})
-    source_file = args.fetch(:file) { fail ArgumentError, &quot;Filename is required&quot; }
-    source = if source_file.respond_to?(:read)
-               source_file.read()
-             else
-               File.open(source_file) do |file|
-                 file.read()
-               end
-             end
-    @rsa = load_ssh_rsa_key(source)
-    @rsa ||= OpenSSL::PKey.read(source)
-  end
-
-  private
-
-  def load_ssh_rsa_key(source)
-    fail &quot;DSA is not supported&quot; if source =~ /^ssh-dsa/
-    return nil unless source =~ /^ssh-rsa/
-
-    keydata = decode_key(source)
-
-    skip_key_type_length = parse_data(keydata.slice!(0, 4))
-    keydata.slice!(0, skip_key_type_length)
-
-    rsakey = OpenSSL::PKey::RSA.new
-    exponent_length = parse_data(keydata.slice!(0, 4))
-    rsakey.e = parse_data(keydata.slice!(0, exponent_length))
-
-    modulus_length = parse_data(keydata.slice!(0, 4))
-    rsakey.n = parse_data(keydata.slice!(0, modulus_length))
-
-    @rsa = rsakey
-  end
-
-  def decode_key(source)
-    base64 = source.chomp.split[1]
-    keydata = base64.unpack(&quot;m&quot;).first
-    keydata
-  end
-
-  def parse_data(data)
-    data.bytes.inject(0) do |sum, byte|
-      (sum &lt;&lt; 8) + byte
-    end
-  end
-
-end</code></pre></noscript></div>
-
-
-<p>In this case I&rsquo;m trying to follow Avdi&rsquo;s ideas: readability and telling a story matters.
-Given that I&rsquo;m in the process of turning this <a href="https://github.com/pcarranza/zssl">console tool</a>
-into a gem that I can actually export I prefer creating an object that will know how to
-handle this ssh key loading instead of a function in a module.</p>
-
-<p>Let&rsquo;s check what goes on in the <code>load_ssh_rsa_key</code> method:</p>
-
-<ul>
-<li>It fails if it gets an DSA key because it is not supported.</li>
-<li>The key is decoded in another method.</li>
-<li>There are 3 chunks of data: key type, exponent and modulus.</li>
-<li>The first 4 bytes are the size of the chunk data.</li>
-<li>With that we can build an RSA key, and that is how it is stored in the ssh key file.</li>
-</ul>
-
-
-<p>Much, much better, I can understand what it does in one read, there are no surprises in that code.</p>
-
-<p>Thanks Avdi.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/10/12/confident-and-readable-code/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -356,325 +162,28 @@ handle this ssh key loading instead of a function in a module.</p>
   </header>
 
 
-  <div class="entry-content"><p>I was on vacation, little to no connectivity, I just needed to learn something new, I needed to code something.</p>
+  <div class="entry-content"><p>I was on vacation, little to no connectivity, I just needed to learn something new: I needed to code something.</p>
 
-<p>Using my phone I downloaded the source code from <a href="https://github.com/sjl/learnvimscriptthehardway/">learn VimScript the hard way</a>; the book.</p>
+<p>Using my phone I downloaded the source code from <a href="https://github.com/sjl/learnvimscriptthehardway/">learn VimScript the hard way</a>.</p>
 
-<p>It was all markdown, and I did not wanted to read no markdown, so I created a very simple <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-sh">bash script</a> to convert this code into html using <a href="https://github.com/davidfstr/rdiscount">rdiscount</a> which happened to be installed in my host.</p>
+<p>It was the book in markdown, but I did not wanted to read markdown, so I hacked a very simple
+<a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-sh">bash script</a>
+to convert this markdown into html using <a href="https://github.com/davidfstr/rdiscount">rdiscount</a>
+which happened to be installed in my laptop.</p>
 
-<p>Executing it in my laptop took something like 11 seconds (5 seconds in my linux host), that is a lot for a markdown to html transformation of 57 files. And there is where I got distracted.</p>
+<p>Executing this script in my laptop took something like 11 seconds&hellip; that is a lot for a 57 files markdown-to-html
+convertion.
+It is way too much. I wrote the same thing <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-rb">using ruby all along</a>.
+This second implementation took less than a second in execution time.</p>
 
-<h3>Without the glue</h3>
+<p>That&rsquo;s it, I got distracted.</p>
 
-<p>It was way too much. I implemented the same thing <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-rb">using ruby all along</a></p>
-
-<p>And this second implementation took less than a second of execution time.</p>
-
-<h2>Lets get some data</h2>
-
-<p>First let&rsquo;s use /usr/bin/time to try to understand what is going on:</p>
-
-<p><code>/usr/bin/time --verbose ../../bash_convert.sh</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>User time (seconds): 4.88
-</span><span class='line'>System time (seconds): 0.56
-</span><span class='line'>Percent of CPU this job got: 97%
-</span><span class='line'>Elapsed (wall clock) time (h:mm:ss or m:ss): 0:05.60
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>/usr/bin/time --verbose ruby1.9.3 ../../convert.rb</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>User time (seconds): 0.09
-</span><span class='line'>System time (seconds): 0.02
-</span><span class='line'>Percent of CPU this job got: 94%
-</span><span class='line'>Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.12
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The time difference is tremendous, let&rsquo;s dive a bit to figure out what is actually going on.</p>
-
-<h2>Profiling with strace</h2>
-
-<p>Strace itself will create a bit of overhead, lets start by running the command with a <code>time</code> up front to capture all the input in one file.</p>
-
-<p><code>/usr/bin/time --verbose strace -r -f executable 2&gt; bc.strace.out</code> will record time while running strace with relative timestamps, also recording subprocesses system calls, then write all the output in the file bc.strace.out</p>
-
-<p>At the bottom we will find the time output section:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Command being timed: "strace -r -f ../../bash_convert.sh"
-</span><span class='line'>User time (seconds): 5.97
-</span><span class='line'>System time (seconds): 3.53
-</span><span class='line'>Percent of CPU this job got: 98%
-</span><span class='line'>Elapsed (wall clock) time (h:mm:ss or m:ss): 0:09.69</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The overhead of catching all the systems calls is around 2 more seconds.</p>
-
-<p>This is what strace output looks like:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> 0.000000 open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000147 open("/lib/x86_64-linux-gnu/libtinfo.so.5", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000175 open("/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000171 open("/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000565 open("/dev/tty", O_RDWR|O_NONBLOCK) = 3
-</span><span class='line'> 0.000147 open("/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000299 open("/proc/meminfo", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000485 open("/usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache", O_RDONLY) = 3
-</span><span class='line'> 0.000653 open("../../bc.sh", O_RDONLY) = 3
-</span><span class='line'>Process 16661 attached
-</span><span class='line'>[pid 16661]      0.002270 open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000105 open("/lib/x86_64-linux-gnu/libselinux.so.1", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000233 open("/lib/x86_64-linux-gnu/librt.so.1", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000175 open("/lib/x86_64-linux-gnu/libacl.so.1", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000183 open("/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000176 open("/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000159 open("/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000200 open("/lib/x86_64-linux-gnu/libattr.so.1", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000762 open("/proc/filesystems", O_RDONLY) = 3
-</span><span class='line'>[pid 16661]      0.000219 open("/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16660]      0.002030 wait4(-1, Process 16660 suspended
-</span><span class='line'>Process 16660 resumed
-</span><span class='line'>Process 16661 detached
-</span><span class='line'>[{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 16661
-</span><span class='line'> 0.000224 --- SIGCHLD (Child exited) @ 0 (0) ---
-</span><span class='line'> 0.000036 wait4(-1, 0x7fffc1760f18, WNOHANG, NULL) = -1 ECHILD (No child processes)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And it goes on long.</p>
-
-<h2>Pre-processing</h2>
-
-<p>Looking at the trace file we will need to do some processing to split the main process and subprocesses output, as the main process is the bash script execution and the subprocesses are ruby executions.</p>
-
-<p>This is what I did to split those two results:</p>
-
-<p>All that starts with the time measurement belongs to the main process</p>
-
-<p><code>grep -e '^ \+[0-9\.]\+ ' bc.strace.out | sed -e 's/^ *//g' &gt; bc.st.mp.out</code></p>
-
-<p>All that starts with <code>[pid xxxx]</code> belongs to a subprocess, also remove the starting pid part</p>
-
-<p><code>grep -e '^\[pid [0-9]\+\]' bc.strace.out | sed -e 's/^\[pid [0-9]\+\] *//g' &gt; bc.st.sp.out</code></p>
-
-<p>We will need some regex processing, define this:</p>
-
-<p><code>function regex { gawk 'match($0,/'$1'/, ary) {print ary['${2:-'0'}']}'; }</code></p>
-
-<h3>And now some questions with the data</h3>
-
-<p>How much time does the main process takes to execute?</p>
-
-<p><code>cat bc.st.mp.out | gawk '{ sum += $1 } END { print sum }'</code>: 0.116901 seconds</p>
-
-<p>How much time does all the subprocesses take to execute?</p>
-
-<p><code>cat bc.st.sp.out | gawk '{ sum += $1 } END { print sum }'</code>: 9.57473 seconds</p>
-
-<p>Where does the time go in execution calls in the main process?</p>
-
-<p><code>for syscall in $(cat bc.st.mp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq); do t=$(grep -e "$syscall" bc.st.mp.out | awk '{ sum += $1 } END { printf("%.6f", sum) }') ; echo $t $syscall; done | sort -gr</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>0.052399 wait4
-</span><span class='line'>0.028265 rt_sigprocmask
-</span><span class='line'>0.009249 write
-</span><span class='line'>0.007297 brk
-</span><span class='line'>0.002603 rt_sigaction
-</span><span class='line'>0.002481 stat
-</span><span class='line'>0.002456 clone
-</span><span class='line'>0.001792 rt_sigreturn
-</span><span class='line'>0.001109 mmap
-</span><span class='line'>0.000966 read
-</span><span class='line'>0.000877 open
-</span><span class='line'>0.000798 mprotect
-</span><span class='line'>0.000737 close
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<p>But how many times each of these functions are being called?</p>
-
-<p><code>cat bc.st.mp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq -c | sort -gr</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>244 rt_sigprocmask
-</span><span class='line'>114 write
-</span><span class='line'>67 rt_sigaction
-</span><span class='line'>59 wait4
-</span><span class='line'>58 rt_sigreturn
-</span><span class='line'>58 clone
-</span><span class='line'>16 brk
-</span><span class='line'>15 mmap
-</span><span class='line'>13 read
-</span><span class='line'>10 stat
-</span><span class='line'>10 close
-</span><span class='line'>9 open
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And what about subprocesses?</p>
-
-<p><code>for syscall in $(cat bc.st.sp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq); do t=$(grep -e "$syscall" bc.st.sp.out | awk '{ sum += $1 } END { printf("%.6f", sum) }') ; echo $t $syscall; done | sort -gr</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>5.164169 stat
-</span><span class='line'>1.204976 open
-</span><span class='line'>1.160715 read
-</span><span class='line'>0.798758 fstat
-</span><span class='line'>0.489750 brk
-</span><span class='line'>0.295447 close
-</span><span class='line'>0.256523 ioctl
-</span><span class='line'>0.251957 lstat
-</span><span class='line'>0.187970 lseek
-</span><span class='line'>0.108561 exit_group
-</span><span class='line'>0.102944 mmap
-</span><span class='line'>0.085621 mprotect
-</span><span class='line'>0.071114 rt_sigaction
-</span><span class='line'>0.061000 getrlimit
-</span><span class='line'>0.060410 rt_sigprocmask
-</span><span class='line'>0.046956 write</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>19790 fstat
-</span><span class='line'>15174 stat
-</span><span class='line'>14602 open
-</span><span class='line'>13177 read
-</span><span class='line'>7940 close
-</span><span class='line'>5930 ioctl
-</span><span class='line'>5244 lstat
-</span><span class='line'>5016 lseek
-</span><span class='line'>2534 mmap
-</span><span class='line'>2149 brk
-</span><span class='line'>1555 mprotect
-</span><span class='line'>1325 rt_sigaction
-</span><span class='line'>...
-</span><span class='line'>115 write
-</span><span class='line'>...
-</span><span class='line'>57 wait4</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>The main process waits, subprocesses open files</h2>
-
-<p>It is what strace shows, the main process spends about half of the time waiting on subprocesses.</p>
-
-<p>Those subprocesses spend most of the time checking file status (stat and fstat, which are being accounted as user time) and then opening and reading files. Which basically is waiting too.</p>
-
-<p>Taking a look at what files are being open in the subprocesses:</p>
-
-<p><code>grep open bc.st.sp.out | sed -e 's/^[0-9\.]\+ //' | sort | uniq -c | sort -gr</code></p>
-
-<p>We will find the ruby environment (about 140 files in this particular case), is being loaded at least 57 times, one per file to convert. This loading is roughly 0.1461 seconds per environment the main process needs to load.</p>
-
-<h3>Conclusions</h3>
-
-<p>This testing answers one of those questions: how heavy is heavy when we talk about interpreted languages like ruby or python.</p>
-
-<p>Loading a full ruby environment is something really heavy and should be taken into consideration if we ever need to do a repetitive task like this one. Going back to the beginning processing all the files in one only environment takes less than the average time it is needed to load it 57 times. And there is an IPC overhead that should also be accounted.</p>
-
-<p>I would never take this as <code>the law</code> or a definite answer, and I will keep using bash for quick dirty hacks or stream processing like I&rsquo;ve done in this very post, glueing cat, grep, sed and awk to parse the data. But if I ever need to automate a task that will be executed many times a day this glue overhead may be too much.</p>
-
-<p>And finally, <code>strace</code> <strong>rocks</strong> big time.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/08/14/glue-overhead-and-real-processing/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -708,33 +217,12 @@ handle this ssh key loading instead of a function in a module.</p>
   </header>
 
 
-  <div class="entry-content"><ul>
-<li>An <a href="http://blog.codinghorror.com/revisiting-the-home-theater-pc/">HTPC</a> with <a href="https://wiki.gnome.org/Apps/Rhythmbox">RhythmBox</a> installed in it</li>
-<li>An <a href="http://www.whathifi.com/yamaha/s500/review">AMP</a> with a pair of <a href="http://www.whathifi.com/monitor-audio/bronze-bx2/review">speakers</a>,</li>
-<li>A <a href="http://hifimediy.com/index.php?route=product/product&amp;product_id=83">DAC</a></li>
-<li>A mobile phone with a browser.</li>
-<li>A pulse audio specific configuration to duplicate the output, analog and DAC (adding HDMI is a small tweak):</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>/etc/pulse/default.pa</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="na">load-module module-combine-sink sink_name</span><span class="o">=</span><span class="s">combined slaves=alsa_output.pci-0000_00_1b.0.analog-stereo,alsa_output.usb-HiFimeDIY_Audio_SA9023_USB_Audio-01-Audio.analog-stereo</span>
-</span><span class='line'><span class="err">set-default-sink</span> <span class="err">combined</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Total spent budget, assuming you already have the HTPC and the mobile phone: 756€</p>
-
-<p>Then you can pick what your player is going to play using your mobile phone, without reaching a keyboard, a mouse or a screen.</p>
-
-<p>You can skip the DAC if you don&rsquo;t care that much about sound, but if don&rsquo;t care too much about sound, you can skip the whole project.</p>
-
-<p>Originally this was built on top of a Mac Mini G4 without the DAC, but time passes and improvements arrive.</p>
-
-<p>Enjoy</p>
-</div>
+  <div class="entry-content"></div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/07/27/rhythmweb-the-setup/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -772,61 +260,12 @@ handle this ssh key loading instead of a function in a module.</p>
 
 <p>As an excercise I was going to recover this project first by adding some testing layer and then refactoring.</p>
 
-<p>In this process I really learned a lot, first about the mindset change that using a completely different language such as Java or Python is: one thing is to write some code in python with a Java style (as it was before) and another completely different thing is understanding how to code in a given language, the idiom, style and patterns that apply to one language does not necessary apply to other.</p>
-
-<p>Second: my code sucks, really; reviewing your own code a few years later is a great humble process, this gives you a lot of perspective at how much you sucked then, and make you wonder how much you will suck now to your future self.</p>
-
-<p>And third: it is really hard to measure quality in any objective and reliable way, some people will talk about code coverage as the ultimate quality index, well, it is not; yes it is useful, but you cannot rely on coverage as the only quality measure. More important than that is common sense and making the right design decisions.</p>
-
-<h2> Testing, mocking and code coverage</h2>
-
-<p>Mocking is actually lying, but in this particular case it is directly impossible to use the real objects that handle Rhythmbox because those are not accessible without a Rhythmbox instance; and it is not easy to automatically launch a Rhythmbox instance and then run tests from there; this can be considered as a project in itself. In fact that would be system testing, and in this case I&rsquo;m going as far as unit testing with some manual system testing using curl.</p>
-
-<p>On the good part, code coverage will give you the visibility to understand what you are actually testing, and what is in a reliable enough status, and with that you can refactor code, removing code that is actually impossible to test applying late <a href="http://en.wikipedia.org/wiki/You_aren't_gonna_need_it">YAGNI</a> and cleaning up the code to make is subjectively better, which is the most I can expect.</p>
-
-<p>The way I faced starting to cover the code was to create a conceptual business layer that did not existed in the code and then starting to cover only this layer while asserting that the mocks were called with the right arguments. I also used some stubs to avoid the &lsquo;mock reply to all&rsquo; pattern as it hides bugs that you will only find when running the code for real.</p>
-
-<p>This alowed me to focus on that conceptual business logic layer and start pushing complexity up and down leaving only what I considered to be application business logic. After that responsibilities started to be more clear, and with this iterative process, pieces started to fall into it&rsquo;s natural place one by one.</p>
-
-<h2>The refactoring log</h2>
-
-<ul>
-<li>With initial coverage, I refactored configuration and logging just for simplification, it helped later.</li>
-<li>Some dead code was removed, including the <a href="https://github.com/pcarranza/rhythmweb/commit/8439ac0fb3b15b3810e9740697fdd959dd06afba">templating engine</a> that was actually not in use, but that was not visible due to excesive complexity. And I was honestly afraid of removing anything without proper testing.</li>
-<li>When I reached <a href="https://coveralls.io/builds/801583">some good coverage</a> of the rest layer I replaced the <a href="https://github.com/pcarranza/rhythmweb/commit/9c0e2f2406476df5632bfecff4e1aae4e156a4af">json parsing and writing implementation</a> that was there from the G4 times with the current python json implementation, less is more.</li>
-<li>Around this point I realized that it was quite easy to <a href="https://github.com/pcarranza/rhythmweb/commit/62c2e1d022e727f6e77b2578ce15e0868d93a16f">introduce bugs using mocks</a> so I added an <a href="https://github.com/pcarranza/rhythmweb/commit/2ab2e2bd19b840ae79149f9d35f18118ddb3bd13">acceptance test that I can run from a terminal</a>.</li>
-<li>The I started pushing complexity out of the rest layer into a controller layer: <a href="https://github.com/pcarranza/rhythmweb/commit/c6b685b1c47a953a5d30d5d3f03ef317679e4f9e">song</a>, <a href="https://github.com/pcarranza/rhythmweb/commit/06361f9a1f96270d595a48550c0eafb64ebfff51">queue</a>, <a href="https://github.com/pcarranza/rhythmweb/commit/12858f5ce871e66c79bf628cc85e64880522276d">player</a> and finally <a href="https://github.com/pcarranza/rhythmweb/commit/ec80ccc5d07b29998f4913fe710559481e6558e7">query</a>.</li>
-<li>With that covered, I <a href="https://github.com/pcarranza/rhythmweb/commit/6e06a554c620da357588788deb78dad7cfbf6788">removed the rhythmbox handler argument that was being passed around</a> and added that as a module value. I was growing on confidence, so I started to do major changes.</li>
-<li>So I started to go down, and started to add coverage for the rhythmbox handler object, with the goal of <a href="https://github.com/pcarranza/rhythmweb/commit/1b442a578841edb6a7f6a5355d116fc4ab5d1dda">removing the multiple inheritance</a> and collapse all the code in one object so it can then be simplified and then splitted again.</li>
-<li>Then refactored too fast without having proper coverage to finally discover a <a href="https://github.com/pcarranza/rhythmweb/commit/b8cfbcf5253ac5a8d18c179cd3ab6fa237aafe7c">bug that exploded in my face</a></li>
-<li>Worked hard on getting real coverage on the rbhandler object, one responisiblity at a time, to finally get the query part refactored, and <a href="https://github.com/pcarranza/rhythmweb/commit/9fc1116209b129542387b177f048e7ef99e08551">looks way much better</a>.</li>
-<li>Finally, just to make sure that things keep running I added some full stack integration testing, basically it launches the server with all the stack and <a href="https://github.com/pcarranza/rhythmweb/commit/7cdc9e60e63ec7ad5df982ed60f3dcf034b8f1c5">gets a page</a>, some <a href="https://github.com/pcarranza/rhythmweb/commit/2929512aee8c1d65d0103c7dc64756c821a04323">page not found error and 500 server error tests</a>, and then <a href="https://github.com/pcarranza/rhythmweb/commit/b34b09bf9bcefb82421940316a157e8c8fc9eeec">posting data test</a>.</li>
-</ul>
-
-
-<p>While doing this I changed some things on the server implementation (simplification) and I&rsquo;m in my way to change all the routing implementation, I can do it because I can test with a full stack integration test that it will keep working.</p>
-
-<h2>The coverage percentage as quality measurement</h2>
-
-<p>The funny thing I found out is that while refactoring I tend to write less code, if this code was covered I will actually reduce the covered absolute number of lines, and also the total number of lines will be reduced. But the funny thing is that in the coveralls metric my refactored code (with better style) as a lower punctuation.</p>
-
-<p>The case of the <a href="https://coveralls.io/builds/870038">rhythmbox handler simplification lost 1.21% of code coverage</a>, and it was just better to have it all on plain sight than spread across multiple objects that where inherithed into the same. But the simple fact that some class definition code was not being imported anymore this hitted the code coverage, producing this &lsquo;bad result&rsquo; lowering the score.</p>
-
-<p>And even worse, the <a href="https://coveralls.io/builds/884174">query refactoring</a> that produced a code that has way better style (<a href="http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)">SOLID wise</a>) also suffered of a 0.1% coverage drop because it simply was less code.</p>
-
-<h2>Final thoughts</h2>
-
-<p>Is code coverage a bad thing? or unnecessary? not at all.</p>
-
-<p>In this particular case, code coverage was a very usefull tool that allowed me to understand where to go next, starting with a thin layer of testing and then moving up and down from there, watching what was touched with each new test and refactoring these pieces of code to a better shape slowly.</p>
-
-<p>In the land of the blind, the one-eye man is king; and code coverage is an eye into your code.</p>
-
-<p>But don&rsquo;t take the percentage of code covered as an indicator of quality, it is just an indicator of visibility.</p>
-
-<p>A lot of the code that is still in the project sucks and must be refactored, I&rsquo;m still working on it.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/06/21/about-code-coverage/">Read on &rarr;</a>
+    </footer>
   
 
 
@@ -872,51 +311,12 @@ And finally it also changed from python2 to python3, breaking the rest of things
  that way I can select what I want to hear without turning on the screen or reaching a keyboard, both things I&rsquo;m not able to do any time.
  I also like the idea of controlling everything from one device.</p>
 
-<h2> The initial project status</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Abandonware">Abandonware</a> is probably the word that fits better.
-Shame on me, as I ignored the project for a long time, mainly because I did not needed it.
-But I do need it back, or maybe it is just that I have some time to dedicate to it, plus I feel embarrassed by that code:
-never underestimate the power of public shame.</p>
-
-<p>Let&rsquo;s face it, I did not wanted to change a thing, it was still kinda running on rhythmbox on gtk3, python2.7,
-which was what I had in my old debian based rhythmbox on the TV box: I did not needed to code anything to use it&hellip;</p>
-
-<h2>The public shame</h2>
-
-<p>I missed it, and progress is progress, and also there is the shame. I needed to do something about it; so, I brought it into my
-<a href="https://github.com/pcarranza/rhythmweb">github</a> account, setup the project on <a href="https://travis-ci.org/pcarranza/rhythmweb">travis-ci</a>
-and the most important, add the <a href="https://coveralls.io/r/pcarranza/rhythmweb">badge with the coverage percentage</a>,
-so the shame becomes public.
-Also I added a roadmap to the readme, which in this case works as a wish list, all the things I want to happen to the project.</p>
-
-<h2>How to work with legacy code?</h2>
-
-<p><em>Legacy code</em> is any code that is not covered by a test. With that definition, you can write legacy code right away, you only need to code,
-and not code tests.</p>
-
-<p>Initially this project had a coverage of a flawless <strong>0</strong>, so it was all legacy code.</p>
-
-<p>There is a lot of refactor to do, but it is not possible to refactor without tests,
-that is like skydiving with a backpack, any backpack, maybe you get lucky and it is a parachute, probably not.</p>
-
-<p>This is where I am right now, writing tests.</p>
-
-<p>This can be tricky, you can spend all your time chasing a 100% coverage number without adding any value to the code, I did that already and I know that nothing good comes out of it, so lets setup a ground rules:</p>
-
-<ul>
-<li>Coverage is a tool, not a goal: it&rsquo;s not about the 100% number, I have to agree with @dhh; coverage is not a magical metric that will make the code perfect, it is just a tool that will let you know what is being tested and what not, it&rsquo;s a matter of common sense to determine if it is enough or not to stop.</li>
-<li>No refactor until basic usage is covered: this is a basic, let&rsquo;s not introduce new bugs on a code that is bad enough.</li>
-<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so let&rsquo;s try to use actual objects when possible and keep mocks under control.</li>
-<li>All changes will be made while using the tool (eat your own dogfood)</li>
-<li>Use travis and coveralls: for gamification</li>
-<li>Declare what is the direction of the project up from in the roadmap to keep focus</li>
-</ul>
-
-
-<p>With all that, I&rsquo;ll resuscitate this project. Stay online for updates.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/23/resuscitating-rhythmweb/">Read on &rarr;</a>
+    </footer>
   
 
 

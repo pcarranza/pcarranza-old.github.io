@@ -4,7 +4,7 @@
   <title><![CDATA[Pablo C]]></title>
   <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-10-12T13:06:33-04:00</updated>
+  <updated>2014-10-13T13:06:53-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -22,6 +22,9 @@
 stretching the mind into a new way of thinking. A new point of view which in the long run
 will provide a much wider view and probably a new tool set which can then be ported back
 into whatever you are doing right now.</p>
+
+<!--more-->
+
 
 <p>While learning ruby, I ended up reading <a href="http://confidentruby.com">Confident Ruby</a> by
 <a href="http://avdi.org">Avdi Grimm</a></p>
@@ -229,23 +232,28 @@ handle this ssh key loading instead of a function in a module.</p>
     <link href="http://pcarranza.github.io/blog/2014/08/14/glue-overhead-and-real-processing/"/>
     <updated>2014-08-14T14:38:39-04:00</updated>
     <id>http://pcarranza.github.io/blog/2014/08/14/glue-overhead-and-real-processing</id>
-    <content type="html"><![CDATA[<p>I was on vacation, little to no connectivity, I just needed to learn something new, I needed to code something.</p>
+    <content type="html"><![CDATA[<p>I was on vacation, little to no connectivity, I just needed to learn something new: I needed to code something.</p>
 
-<p>Using my phone I downloaded the source code from <a href="https://github.com/sjl/learnvimscriptthehardway/">learn VimScript the hard way</a>; the book.</p>
+<p>Using my phone I downloaded the source code from <a href="https://github.com/sjl/learnvimscriptthehardway/">learn VimScript the hard way</a>.</p>
 
-<p>It was all markdown, and I did not wanted to read no markdown, so I created a very simple <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-sh">bash script</a> to convert this code into html using <a href="https://github.com/davidfstr/rdiscount">rdiscount</a> which happened to be installed in my host.</p>
+<p>It was the book in markdown, but I did not wanted to read markdown, so I hacked a very simple
+<a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-sh">bash script</a>
+to convert this markdown into html using <a href="https://github.com/davidfstr/rdiscount">rdiscount</a>
+which happened to be installed in my laptop.</p>
 
-<p>Executing it in my laptop took something like 11 seconds (5 seconds in my linux host), that is a lot for a markdown to html transformation of 57 files. And there is where I got distracted.</p>
+<p>Executing this script in my laptop took something like 11 seconds&hellip; that is a lot for a 57 files markdown-to-html
+convertion.
+It is way too much. I wrote the same thing <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-rb">using ruby all along</a>.
+This second implementation took less than a second in execution time.</p>
 
-<h3>Without the glue</h3>
+<p>That&rsquo;s it, I got distracted.</p>
 
-<p>It was way too much. I implemented the same thing <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-rb">using ruby all along</a></p>
+<!--more-->
 
-<p>And this second implementation took less than a second of execution time.</p>
 
 <h2>Lets get some data</h2>
 
-<p>First let&rsquo;s use /usr/bin/time to try to understand what is going on:</p>
+<p>First let&rsquo;s use /usr/bin/time to try to understand at a 10km height view what is going on:</p>
 
 <p><code>/usr/bin/time --verbose ../../bash_convert.sh</code></p>
 
@@ -279,11 +287,15 @@ handle this ssh key loading instead of a function in a module.</p>
 
 <h2>Profiling with strace</h2>
 
-<p>Strace itself will create a bit of overhead, lets start by running the command with a <code>time</code> up front to capture all the input in one file.</p>
+<p>Strace itself will add a bit of overhead, let&rsquo;s begin running the command with a <code>time</code> up front
+to capture all the input in one file, including the strace overhead.</p>
 
-<p><code>/usr/bin/time --verbose strace -r -f executable 2&gt; bc.strace.out</code> will record time while running strace with relative timestamps, also recording subprocesses system calls, then write all the output in the file bc.strace.out</p>
+<p><code>/usr/bin/time --verbose strace -r -f executable 2&gt; bc.strace.out</code>
+will record time while running strace with relative timestamps,
+also recording subprocesses system calls, then write all the
+output in the file bc.strace.out</p>
 
-<p>At the bottom we will find the time output section:</p>
+<p>At the bottom of the output we will find the total time output section:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -297,9 +309,10 @@ handle this ssh key loading instead of a function in a module.</p>
 </span><span class='line'>Elapsed (wall clock) time (h:mm:ss or m:ss): 0:09.69</span></code></pre></td></tr></table></div></figure>
 
 
-<p>The overhead of catching all the systems calls is around 2 more seconds.</p>
+<p>It looks like the overhead of catching all the systems calls with strace is
+around 2 more seconds.</p>
 
-<p>This is what strace output looks like:</p>
+<p>Strace output looks like this:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -355,37 +368,51 @@ handle this ssh key loading instead of a function in a module.</p>
 </span><span class='line'> 0.000036 wait4(-1, 0x7fffc1760f18, WNOHANG, NULL) = -1 ECHILD (No child processes)</span></code></pre></td></tr></table></div></figure>
 
 
-<p>And it goes on long.</p>
+<p>And it goes on and on and on.</p>
 
-<h2>Pre-processing</h2>
+<h2>Pre-processing strace output</h2>
 
-<p>Looking at the trace file we will need to do some processing to split the main process and subprocesses output, as the main process is the bash script execution and the subprocesses are ruby executions.</p>
+<p>Looking at the trace file we will need to do some processing to split the main process
+from the subprocesses data, as the main process is the bash script execution and the
+subprocesses are ruby interpreter executions.</p>
 
-<p>This is what I did to split those two results:</p>
+<p>This is what I did to split those two data sets:</p>
 
-<p>All that starts with the time measurement belongs to the main process</p>
+<p>All that starts with spaces and then a time measurement belongs to the main process.
+But all that starts with <code>[pid xxxx]</code> belongs to a subprocess.</p>
+
+<p>So, let&rsquo;s split output into main-process and sub-processes:</p>
 
 <p><code>grep -e '^ \+[0-9\.]\+ ' bc.strace.out | sed -e 's/^ *//g' &gt; bc.st.mp.out</code></p>
 
-<p>All that starts with <code>[pid xxxx]</code> belongs to a subprocess, also remove the starting pid part</p>
-
 <p><code>grep -e '^\[pid [0-9]\+\]' bc.strace.out | sed -e 's/^\[pid [0-9]\+\] *//g' &gt; bc.st.sp.out</code></p>
-
-<p>We will need some regex processing, define this:</p>
-
-<p><code>function regex { gawk 'match($0,/'$1'/, ary) {print ary['${2:-'0'}']}'; }</code></p>
 
 <h3>And now some questions with the data</h3>
 
-<p>How much time does the main process takes to execute?</p>
+<p>First, we will need some regex processing, so define this function to make your life easier:</p>
+
+<p><code>function regex { gawk 'match($0,/'$1'/, ary) {print ary['${2:-'0'}']}'; }</code></p>
+
+<p>And then:</p>
+
+<ul>
+<li>How much time do the main process takes to execute?</li>
+</ul>
+
 
 <p><code>cat bc.st.mp.out | gawk '{ sum += $1 } END { print sum }'</code>: 0.116901 seconds</p>
 
-<p>How much time does all the subprocesses take to execute?</p>
+<ul>
+<li>How much time do all the subprocesses take to execute?</li>
+</ul>
+
 
 <p><code>cat bc.st.sp.out | gawk '{ sum += $1 } END { print sum }'</code>: 9.57473 seconds</p>
 
-<p>Where does the time go in execution calls in the main process?</p>
+<ul>
+<li>In the main process, how much time do each system call take?</li>
+</ul>
+
 
 <p><code>for syscall in $(cat bc.st.mp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq); do t=$(grep -e "$syscall" bc.st.mp.out | awk '{ sum += $1 } END { printf("%.6f", sum) }') ; echo $t $syscall; done | sort -gr</code></p>
 
@@ -419,7 +446,10 @@ handle this ssh key loading instead of a function in a module.</p>
 </span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
 
 
-<p>But how many times each of these functions are being called?</p>
+<ul>
+<li>But how many times each of these system calls are being called on the main process?</li>
+</ul>
+
 
 <p><code>cat bc.st.mp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq -c | sort -gr</code></p>
 
@@ -451,7 +481,10 @@ handle this ssh key loading instead of a function in a module.</p>
 </span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
 
 
-<p>And what about subprocesses?</p>
+<ul>
+<li>How much time does each system call takes in the subprocesses?</li>
+</ul>
+
 
 <p><code>for syscall in $(cat bc.st.sp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq); do t=$(grep -e "$syscall" bc.st.sp.out | awk '{ sum += $1 } END { printf("%.6f", sum) }') ; echo $t $syscall; done | sort -gr</code></p>
 
@@ -489,6 +522,9 @@ handle this ssh key loading instead of a function in a module.</p>
 </span><span class='line'>0.046956 write</span></code></pre></td></tr></table></div></figure>
 
 
+<ul>
+<li>And how many times is each one called?</li>
+</ul>
 
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -525,27 +561,36 @@ handle this ssh key loading instead of a function in a module.</p>
 </span><span class='line'>57 wait4</span></code></pre></td></tr></table></div></figure>
 
 
-<h2>The main process waits, subprocesses open files</h2>
+<h3>Conclusions</h3>
 
-<p>It is what strace shows, the main process spends about half of the time waiting on subprocesses.</p>
+<h2>The main process waits, subprocesses open and read files</h2>
 
-<p>Those subprocesses spend most of the time checking file status (stat and fstat, which are being accounted as user time) and then opening and reading files. Which basically is waiting too.</p>
+<p>This is what strace shows, the main process spends about half of its execution time waiting on subprocesses.</p>
 
-<p>Taking a look at what files are being open in the subprocesses:</p>
+<p>The subprocesses spend most of the time checking for file status (stat and fstat, which are being
+accounted as user time) and then opening and reading files. Which basically is waiting too.</p>
+
+<p>Taking a look at what files are being open by the subprocesses</p>
 
 <p><code>grep open bc.st.sp.out | sed -e 's/^[0-9\.]\+ //' | sort | uniq -c | sort -gr</code></p>
 
-<p>We will find the ruby environment (about 140 files in this particular case), is being loaded at least 57 times, one per file to convert. This loading is roughly 0.1461 seconds per environment the main process needs to load.</p>
+<p>We find that the ruby environment (about 140 files in this particular case), is being loaded at least 57 times,
+one time per file to convert. This loading is roughly 0.1461 seconds per environment the main process needs to load.
+And a simple multiplication (0.1461 * 57 = 8.3277) explains where the time actually goes: in the glue, loading
+one full environment for each file to convert.</p>
 
-<h3>Conclusions</h3>
+<p>For me, this answers one of those questions that is always bouncing in my head: how heavy is heavy when we
+talk about interpreted languages like ruby or python.</p>
 
-<p>This testing answers one of those questions: how heavy is heavy when we talk about interpreted languages like ruby or python.</p>
+<p>Loading a full ruby environment is something really heavy and should be taken into consideration if we ever need
+to do a repetitive task. Going back to the beginning processing all the files in one only environment takes less
+than the average time it is needed to load it 57 times.</p>
 
-<p>Loading a full ruby environment is something really heavy and should be taken into consideration if we ever need to do a repetitive task like this one. Going back to the beginning processing all the files in one only environment takes less than the average time it is needed to load it 57 times. And there is an IPC overhead that should also be accounted.</p>
+<p>This said, I will keep using bash for quick dirty hacks or stream processing like I&rsquo;ve done in this very post,
+glueing cat, grep, sed and awk to parse the data. But if I ever need to automate a task that will be executed
+many times a day this glue overhead may be too much.</p>
 
-<p>I would never take this as <code>the law</code> or a definite answer, and I will keep using bash for quick dirty hacks or stream processing like I&rsquo;ve done in this very post, glueing cat, grep, sed and awk to parse the data. But if I ever need to automate a task that will be executed many times a day this glue overhead may be too much.</p>
-
-<p>And finally, <code>strace</code> <strong>rocks</strong> big time.</p>
+<p><code>strace</code> <strong>rocks</strong> big time.</p>
 ]]></content>
   </entry>
   
@@ -554,7 +599,10 @@ handle this ssh key loading instead of a function in a module.</p>
     <link href="http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup/"/>
     <updated>2014-07-27T12:57:19-04:00</updated>
     <id>http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup</id>
-    <content type="html"><![CDATA[<ul>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<ul>
 <li>An <a href="http://blog.codinghorror.com/revisiting-the-home-theater-pc/">HTPC</a> with <a href="https://wiki.gnome.org/Apps/Rhythmbox">RhythmBox</a> installed in it</li>
 <li>An <a href="http://www.whathifi.com/yamaha/s500/review">AMP</a> with a pair of <a href="http://www.whathifi.com/monitor-audio/bronze-bx2/review">speakers</a>,</li>
 <li>A <a href="http://hifimediy.com/index.php?route=product/product&amp;product_id=83">DAC</a></li>
@@ -590,6 +638,9 @@ handle this ssh key loading instead of a function in a module.</p>
     <content type="html"><![CDATA[<p>On the <a href="http://pcarranza.github.io/2014/05/resuscitating-rhythmweb.html">previous post</a> I was talking about <a href="https://github.com/pcarranza/rhythmweb">legacy code</a>, considering legacy code as any code that has no tests.</p>
 
 <p>As an excercise I was going to recover this project first by adding some testing layer and then refactoring.</p>
+
+<!--more-->
+
 
 <p>In this process I really learned a lot, first about the mindset change that using a completely different language such as Java or Python is: one thing is to write some code in python with a Java style (as it was before) and another completely different thing is understanding how to code in a given language, the idiom, style and patterns that apply to one language does not necessary apply to other.</p>
 
@@ -663,6 +714,9 @@ And finally it also changed from python2 to python3, breaking the rest of things
 <p>There is a lot of work to do to bring it back. The way I use it is turn my mobile phone into a remote control for my music player: <a href="https://wiki.gnome.org/Apps/Rhythmbox">rhythmbox</a>,
  that way I can select what I want to hear without turning on the screen or reaching a keyboard, both things I&rsquo;m not able to do any time.
  I also like the idea of controlling everything from one device.</p>
+
+<!--more-->
+
 
 <h2> The initial project status</h2>
 

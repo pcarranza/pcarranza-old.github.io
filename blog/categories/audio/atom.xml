@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Audio, | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/audio/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-10-12T13:06:33-04:00</updated>
+  <updated>2014-10-13T13:06:53-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -18,7 +18,10 @@
     <link href="http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup/"/>
     <updated>2014-07-27T12:57:19-04:00</updated>
     <id>http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup</id>
-    <content type="html"><![CDATA[<ul>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<ul>
 <li>An <a href="http://blog.codinghorror.com/revisiting-the-home-theater-pc/">HTPC</a> with <a href="https://wiki.gnome.org/Apps/Rhythmbox">RhythmBox</a> installed in it</li>
 <li>An <a href="http://www.whathifi.com/yamaha/s500/review">AMP</a> with a pair of <a href="http://www.whathifi.com/monitor-audio/bronze-bx2/review">speakers</a>,</li>
 <li>A <a href="http://hifimediy.com/index.php?route=product/product&amp;product_id=83">DAC</a></li>

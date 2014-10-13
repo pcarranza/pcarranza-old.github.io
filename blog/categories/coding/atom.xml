@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Coding | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/coding/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-10-12T13:06:33-04:00</updated>
+  <updated>2014-10-13T13:06:53-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -22,6 +22,9 @@
 stretching the mind into a new way of thinking. A new point of view which in the long run
 will provide a much wider view and probably a new tool set which can then be ported back
 into whatever you are doing right now.</p>
+
+<!--more-->
+
 
 <p>While learning ruby, I ended up reading <a href="http://confidentruby.com">Confident Ruby</a> by
 <a href="http://avdi.org">Avdi Grimm</a></p>
