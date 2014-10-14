@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Opinions | Pablo C]]></title>
+  <link href="http://pcarranza.github.io/blog/categories/opinions/atom.xml" rel="self"/>
+  <link href="http://pcarranza.github.io/"/>
+  <updated>2014-10-14T15:25:37-04:00</updated>
+  <id>http://pcarranza.github.io/</id>
+  <author>
+    <name><![CDATA[Pablo C]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Resuscitating Rhythmweb]]></title>
+    <link href="http://pcarranza.github.io/blog/2014/05/23/resuscitating-rhythmweb/"/>
+    <updated>2014-05-23T18:50:00-04:00</updated>
+    <id>http://pcarranza.github.io/blog/2014/05/23/resuscitating-rhythmweb</id>
+    <content type="html"><![CDATA[<p>There was an old project, it started based on an ancient ppc ubuntu that was running on top of a mac mini G4, built for python 2.4 in an environment that did not accepted installing any dependency.</p>
+
+<p>Back in the day I did not knew what a unit test was, so I built it the old way: code a little, try it, code a little more, make it work again, etc, etc.
+You can tell if you see the old code, it is full with logging messages to check if the execution reach a certain portion of the code, oh yeah, no debugging was possible.</p>
+
+<p>In the middle of the road, rhythmbox evolved, with <a href="http://www.gnome.org/gnome-3/">gnome-shell</a> rhythmbox adapted to <a href="http://www.gtk.org/">GTK3</a>, breaking a lot of things.
+And finally it also changed from python2 to python3, breaking the rest of things.</p>
+
+<p>There is a lot of work to do to bring it back. The way I use it is turn my mobile phone into a remote control for my music player: <a href="https://wiki.gnome.org/Apps/Rhythmbox">rhythmbox</a>,
+ that way I can select what I want to hear without turning on the screen or reaching a keyboard, both things I&rsquo;m not able to do any time.
+ I also like the idea of controlling everything from one device.</p>
+
+<!--more-->
+
+
+<h2> The initial project status</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Abandonware">Abandonware</a> is probably the word that fits better.
+Shame on me, as I ignored the project for a long time, mainly because I did not needed it.
+But I do need it back, or maybe it is just that I have some time to dedicate to it, plus I feel embarrassed by that code:
+never underestimate the power of public shame.</p>
+
+<p>Let&rsquo;s face it, I did not wanted to change a thing, it was still kinda running on rhythmbox on gtk3, python2.7,
+which was what I had in my old debian based rhythmbox on the TV box: I did not needed to code anything to use it&hellip;</p>
+
+<h2>The public shame</h2>
+
+<p>I missed it, and progress is progress, and also there is the shame. I needed to do something about it; so, I brought it into my
+<a href="https://github.com/pcarranza/rhythmweb">github</a> account, setup the project on <a href="https://travis-ci.org/pcarranza/rhythmweb">travis-ci</a>
+and the most important, add the <a href="https://coveralls.io/r/pcarranza/rhythmweb">badge with the coverage percentage</a>,
+so the shame becomes public.
+Also I added a roadmap to the readme, which in this case works as a wish list, all the things I want to happen to the project.</p>
+
+<h2>How to work with legacy code?</h2>
+
+<p><em>Legacy code</em> is any code that is not covered by a test. With that definition, you can write legacy code right away, you only need to code,
+and not code tests.</p>
+
+<p>Initially this project had a coverage of a flawless <strong>0</strong>, so it was all legacy code.</p>
+
+<p>There is a lot of refactor to do, but it is not possible to refactor without tests,
+that is like skydiving with a backpack, any backpack, maybe you get lucky and it is a parachute, probably not.</p>
+
+<p>This is where I am right now, writing tests.</p>
+
+<p>This can be tricky, you can spend all your time chasing a 100% coverage number without adding any value to the code, I did that already and I know that nothing good comes out of it, so lets setup a ground rules:</p>
+
+<ul>
+<li>Coverage is a tool, not a goal: it&rsquo;s not about the 100% number, I have to agree with @dhh; coverage is not a magical metric that will make the code perfect, it is just a tool that will let you know what is being tested and what not, it&rsquo;s a matter of common sense to determine if it is enough or not to stop.</li>
+<li>No refactor until basic usage is covered: this is a basic, let&rsquo;s not introduce new bugs on a code that is bad enough.</li>
+<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so let&rsquo;s try to use actual objects when possible and keep mocks under control.</li>
+<li>All changes will be made while using the tool (eat your own dogfood)</li>
+<li>Use travis and coveralls: for gamification</li>
+<li>Declare what is the direction of the project up from in the roadmap to keep focus</li>
+</ul>
+
+
+<p>With all that, I&rsquo;ll resuscitate this project. Stay online for updates.</p>
+]]></content>
+  </entry>
+  
+</feed>
