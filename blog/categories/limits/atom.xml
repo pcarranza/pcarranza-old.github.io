@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Limits | Pablo C]]></title>
+  <link href="http://pcarranza.github.io/blog/categories/limits/atom.xml" rel="self"/>
+  <link href="http://pcarranza.github.io/"/>
+  <updated>2014-10-18T12:09:51-04:00</updated>
+  <id>http://pcarranza.github.io/</id>
+  <author>
+    <name><![CDATA[Pablo C]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[108 Chars Have to Be Enough for Everybody]]></title>
+    <link href="http://pcarranza.github.io/blog/2014/10/18/108-chars-have-to-be-enough-for-everybody/"/>
+    <updated>2014-10-18T15:10:34-04:00</updated>
+    <id>http://pcarranza.github.io/blog/2014/10/18/108-chars-have-to-be-enough-for-everybody</id>
+    <content type="html"><![CDATA[<p>Look at this code:</p>
+
+<p>``` ruby</p>
+
+<blockquote><p>require &ldquo;socket&rdquo;
+  => true
+socket_file = &ldquo;/tmp/1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123&rdquo;
+  => &ldquo;/tmp/1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123&rdquo;
+socket_file.length
+  => 108
+Socket.unix_server_socket(socket_file)
+  => #&lt;Socket:fd 1>
+```</p></blockquote>
+
+<!--more-->
+
+
+<p>Now let&rsquo;s add one more char:</p>
+
+<p>``` ruby</p>
+
+<blockquote><p>socket_file = &ldquo;/tmp/12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234&rdquo;
+  => &ldquo;/tmp/12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234&rdquo;
+socket_file.length
+  => 109
+sock = Socket.unix_server_socket(socket_file)
+  ArgumentError: too long unix socket path (109 bytes given but 108 bytes max)</p>
+
+<pre><code>from /usr/local/rvm/rubies/ruby-2.1.2/lib/ruby/2.1.0/socket.rb:817:in `unix'
+from /usr/local/rvm/rubies/ruby-2.1.2/lib/ruby/2.1.0/socket.rb:817:in `unix_server_socket'
+from (irb):13
+from /usr/local/rvm/rubies/ruby-2.1.2/bin/irb:11:in `&lt;main&gt;'
+</code></pre>
+
+<p>```</p></blockquote>
+
+<p>Now that is an interesting error, but where does this come from?</p>
+
+<p>``` c <a href="http://man7.org/linux/man-pages/man7/unix.7.html">http://man7.org/linux/man-pages/man7/unix.7.html</a></p>
+
+<h1>define UNIX_PATH_MAX    108</h1>
+
+<p>struct sockaddr_un {</p>
+
+<pre><code>sa_family_t sun_family;               /* AF_UNIX */
+char        sun_path[UNIX_PATH_MAX];  /* pathname */
+</code></pre>
+
+<p>};
+```</p>
+
+<p>So it is an unix <em>feature</em>.</p>
+
+<p>And what about pure unix? Let&rsquo;s check what happens on OSX</p>
+
+<p>``` ruby</p>
+
+<blockquote><blockquote><p>Socket.unix_server_socket(socket_file)
+  ArgumentError: too long unix socket path (109 bytes given but 104 bytes max)</p>
+
+<pre><code>from /Users/me/.rvm/rubies/ruby-2.1.1/lib/ruby/2.1.0/socket.rb:817:in `unix'
+from /Users/me/.rvm/rubies/ruby-2.1.1/lib/ruby/2.1.0/socket.rb:817:in `unix_server_socket'
+from (irb):6
+from /Users/me/.rvm/rubies/ruby-2.1.1/bin/irb:11:in `&lt;main&gt;'
+</code></pre>
+
+<p>```</p></blockquote></blockquote>
+
+<p>It is even shorter. No joy on the pure unix world.</p>
+
+<h2>You may be wondering</h2>
+
+<p>What&rsquo;s the fun in all this? Check this out:</p>
+
+<p>``` bash
+~$ SSH_SOCKET=/tmp/01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123
+~$ echo $SSH_SOCKET | awk &lsquo;{print length($0)}&rsquo;
+109
+~$ ssh -o ControlMaster=yes -o ControlPath=$SSH_SOCKET myremotehost 2> ssh_stderr
+Welcome to MyRemoteBox</p>
+
+<p>  System information as of Fri Oct 17 18:29:43 EDT 2014</p>
+
+<p>  System load:  0.0                Processes:           a_lot
+  Memory usage: relaxed</p>
+
+<p>Last login: some time not too long ago from my.home.host.ip
+[MyRemoteBox]~$ ^D</p>
+
+<p>~$ cat ssh_stderr
+ControlPath &ldquo;/tmp/01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123.bDqhMCS6EbmdeDeN&rdquo; too long for Unix domain socket
+Connection to my.remote.box.ip closed.
+```</p>
+
+<p><code>ssh</code> will <em>just work</em>, and you will get a connection: your master ssh connection
+will reach the other end. But the socket will not be open, because <strong>the path is too long</strong>.</p>
+
+<p>The worse part is that this failure will just log a message in stderr; that&rsquo;s it, good luck
+to you if you are multiplexing ssh connections through a control path in any automation.
+The main ssh connection will work but the rest will fail with weird messages like
+&ldquo;hostname X not resolved&rdquo; because, in fact, the hostname cannot be resolved since
+your client is not piped into the right network.</p>
+
+<p>And this goes beyond, not <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh+1">ssh</a>
+nor <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh_config+5">ssh_config</a> man pages
+say anything about this limitation.</p>
+
+<p>Even checking filesystems limits: there are <a href="http://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits">limits for file names</a>
+(normally 255 bytes); but at least with any modern ext4 of hfs+, which should be quite
+standard now, there is no specific limitation for the path size.</p>
+
+<p>But yeah, a socket file looks like a file, but it is not a file, so general filesystem
+limitations in which the socket file exists do not apply to them. They have their own.</p>
+
+<p>Mind the gap.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -4,7 +4,7 @@
   <title><![CDATA[Pablo C]]></title>
   <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-10-14T15:27:35-04:00</updated>
+  <updated>2014-10-18T12:09:51-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -12,6 +12,165 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[108 Chars Have to Be Enough for Everybody]]></title>
+    <link href="http://pcarranza.github.io/blog/2014/10/18/108-chars-have-to-be-enough-for-everybody/"/>
+    <updated>2014-10-18T15:10:34-04:00</updated>
+    <id>http://pcarranza.github.io/blog/2014/10/18/108-chars-have-to-be-enough-for-everybody</id>
+    <content type="html"><![CDATA[<p>Look at this code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;</span> <span class="nb">require</span> <span class="s2">&quot;socket&quot;</span>
+</span><span class='line'>  <span class="o">=&gt;</span> <span class="kp">true</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">socket_file</span> <span class="o">=</span> <span class="s2">&quot;/tmp/1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123&quot;</span>
+</span><span class='line'>  <span class="o">=&gt;</span> <span class="s2">&quot;/tmp/1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123&quot;</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">socket_file</span><span class="o">.</span><span class="n">length</span>
+</span><span class='line'>  <span class="o">=&gt;</span> <span class="mi">108</span>
+</span><span class='line'><span class="no">Socket</span><span class="o">.</span><span class="n">unix_server_socket</span><span class="p">(</span><span class="n">socket_file</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">=&gt;</span> <span class="c1">#&lt;Socket:fd 1&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!--more-->
+
+
+<p>Now let&rsquo;s add one more char:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;</span> <span class="n">socket_file</span> <span class="o">=</span> <span class="s2">&quot;/tmp/12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234&quot;</span>
+</span><span class='line'>  <span class="o">=&gt;</span> <span class="s2">&quot;/tmp/12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234&quot;</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">socket_file</span><span class="o">.</span><span class="n">length</span>
+</span><span class='line'>  <span class="o">=&gt;</span> <span class="mi">109</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">sock</span> <span class="o">=</span> <span class="no">Socket</span><span class="o">.</span><span class="n">unix_server_socket</span><span class="p">(</span><span class="n">socket_file</span><span class="p">)</span>
+</span><span class='line'>  <span class="ss">ArgumentError</span><span class="p">:</span> <span class="n">too</span> <span class="n">long</span> <span class="n">unix</span> <span class="n">socket</span> <span class="n">path</span> <span class="p">(</span><span class="mi">109</span> <span class="n">bytes</span> <span class="n">given</span> <span class="n">but</span> <span class="mi">108</span> <span class="n">bytes</span> <span class="n">max</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">from</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">rvm</span><span class="o">/</span><span class="n">rubies</span><span class="o">/</span><span class="n">ruby</span><span class="o">-</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">2</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ruby</span><span class="o">/</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">/</span><span class="n">socket</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">817</span><span class="ss">:in</span> <span class="sb">`unix&#39;</span>
+</span><span class='line'><span class="sb">    from /usr/local/rvm/rubies/ruby-2.1.2/lib/ruby/2.1.0/socket.rb:817:in `</span><span class="n">unix_server_socket</span><span class="s1">&#39;</span>
+</span><span class='line'><span class="s1">    from (irb):13</span>
+</span><span class='line'><span class="s1">    from /usr/local/rvm/rubies/ruby-2.1.2/bin/irb:11:in `&lt;main&gt;&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now that is an interesting error, but where does this come from?</p>
+
+<figure class='code'><figcaption><span>http://man7.org/linux/man-pages/man7/unix.7.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#define UNIX_PATH_MAX    108</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">struct</span> <span class="n">sockaddr_un</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">sa_family_t</span> <span class="n">sun_family</span><span class="p">;</span>               <span class="cm">/* AF_UNIX */</span>
+</span><span class='line'>    <span class="kt">char</span>        <span class="n">sun_path</span><span class="p">[</span><span class="n">UNIX_PATH_MAX</span><span class="p">];</span>  <span class="cm">/* pathname */</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So it is an unix <em>feature</em>.</p>
+
+<p>And what about pure unix? Let&rsquo;s check what happens on OSX</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;&gt;</span> <span class="no">Socket</span><span class="o">.</span><span class="n">unix_server_socket</span><span class="p">(</span><span class="n">socket_file</span><span class="p">)</span>
+</span><span class='line'>  <span class="ss">ArgumentError</span><span class="p">:</span> <span class="n">too</span> <span class="n">long</span> <span class="n">unix</span> <span class="n">socket</span> <span class="n">path</span> <span class="p">(</span><span class="mi">109</span> <span class="n">bytes</span> <span class="n">given</span> <span class="n">but</span> <span class="mi">104</span> <span class="n">bytes</span> <span class="n">max</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">from</span> <span class="sr">/Users/me</span><span class="o">/.</span><span class="n">rvm</span><span class="o">/</span><span class="n">rubies</span><span class="o">/</span><span class="n">ruby</span><span class="o">-</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ruby</span><span class="o">/</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">/</span><span class="n">socket</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">817</span><span class="ss">:in</span> <span class="sb">`unix&#39;</span>
+</span><span class='line'><span class="sb">    from /Users/me/.rvm/rubies/ruby-2.1.1/lib/ruby/2.1.0/socket.rb:817:in `</span><span class="n">unix_server_socket</span><span class="s1">&#39;</span>
+</span><span class='line'><span class="s1">    from (irb):6</span>
+</span><span class='line'><span class="s1">    from /Users/me/.rvm/rubies/ruby-2.1.1/bin/irb:11:in `&lt;main&gt;&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It is even shorter. No joy on the pure unix world.</p>
+
+<h2>You may be wondering</h2>
+
+<p>What&rsquo;s the fun in all this? Check this out:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>~<span class="nv">$ SSH_SOCKET</span><span class="o">=</span>/tmp/01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123
+</span><span class='line'>~<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$SSH_SOCKET</span> <span class="p">|</span> awk <span class="s1">&#39;{print length($0)}&#39;</span>
+</span><span class='line'>109
+</span><span class='line'>~<span class="nv">$ </span>ssh -o <span class="nv">ControlMaster</span><span class="o">=</span>yes -o <span class="nv">ControlPath</span><span class="o">=</span><span class="nv">$SSH_SOCKET</span> myremotehost 2&gt; ssh_stderr
+</span><span class='line'>Welcome to MyRemoteBox
+</span><span class='line'>
+</span><span class='line'>  System information as of Fri Oct 17 18:29:43 EDT 2014
+</span><span class='line'>
+</span><span class='line'>  System load:  0.0                Processes:           a_lot
+</span><span class='line'>  Memory usage: relaxed
+</span><span class='line'>
+</span><span class='line'>Last login: some <span class="nb">time </span>not too long ago from my.home.host.ip
+</span><span class='line'><span class="o">[</span>MyRemoteBox<span class="o">]</span>~<span class="nv">$ </span>^D
+</span><span class='line'>
+</span><span class='line'>~<span class="nv">$ </span>cat ssh_stderr
+</span><span class='line'>ControlPath <span class="s2">&quot;/tmp/01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123.bDqhMCS6EbmdeDeN&quot;</span> too long <span class="k">for </span>Unix domain socket
+</span><span class='line'>Connection to my.remote.box.ip closed.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>ssh</code> will <em>just work</em>, and you will get a connection: your master ssh connection
+will reach the other end. But the socket will not be open, because <strong>the path is too long</strong>.</p>
+
+<p>The worse part is that this failure will just log a message in stderr; that&rsquo;s it, good luck
+to you if you are multiplexing ssh connections through a control path in any automation.
+The main ssh connection will work but the rest will fail with weird messages like
+&ldquo;hostname X not resolved&rdquo; because, in fact, the hostname cannot be resolved since
+your client is not piped into the right network.</p>
+
+<p>And this goes beyond, not <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh+1">ssh</a>
+nor <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh_config+5">ssh_config</a> man pages
+say anything about this limitation.</p>
+
+<p>Even checking filesystems limits: there are <a href="http://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits">limits for file names</a>
+(normally 255 bytes); but at least with any modern ext4 of hfs+, which should be quite
+standard now, there is no specific limitation for the path size.</p>
+
+<p>But yeah, a socket file looks like a file, but it is not a file, so general filesystem
+limitations in which the socket file exists do not apply to them. They have their own.</p>
+
+<p>Mind the gap.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Confident and Readable Code]]></title>
