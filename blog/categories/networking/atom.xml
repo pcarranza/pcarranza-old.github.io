@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Networking | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/networking/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-10-18T12:09:51-04:00</updated>
+  <updated>2014-10-19T12:03:30-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -115,7 +115,7 @@ Connection to my.remote.box.ip closed.
 <p><code>ssh</code> will <em>just work</em>, and you will get a connection: your master ssh connection
 will reach the other end. But the socket will not be open, because <strong>the path is too long</strong>.</p>
 
-<p>The worse part is that this failure will just log a message in stderr; that&rsquo;s it, good luck
+<p>The worst part is that this failure will just log a message in stderr; that&rsquo;s it, good luck
 to you if you are multiplexing ssh connections through a control path in any automation.
 The main ssh connection will work but the rest will fail with weird messages like
 &ldquo;hostname X not resolved&rdquo; because, in fact, the hostname cannot be resolved since

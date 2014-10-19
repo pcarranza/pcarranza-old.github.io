@@ -258,7 +258,7 @@
 <p><code>ssh</code> will <em>just work</em>, and you will get a connection: your master ssh connection
 will reach the other end. But the socket will not be open, because <strong>the path is too long</strong>.</p>
 
-<p>The worse part is that this failure will just log a message in stderr; that&rsquo;s it, good luck
+<p>The worst part is that this failure will just log a message in stderr; that&rsquo;s it, good luck
 to you if you are multiplexing ssh connections through a control path in any automation.
 The main ssh connection will work but the rest will fail with weird messages like
 &ldquo;hostname X not resolved&rdquo; because, in fact, the hostname cannot be resolved since
