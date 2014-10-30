@@ -3,6 +3,12 @@
   
   
   <url>
+    <loc>http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild/</loc>
+    <lastmod>2014-10-30T16:34:58-04:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://pcarranza.github.io/blog/2014/10/18/108-chars-have-to-be-enough-for-everybody/</loc>
     <lastmod>2014-10-18T15:10:34-04:00</lastmod>
     <priority>0.8</priority>
@@ -41,14 +47,14 @@
   
   <url>
     <loc>http://pcarranza.github.io/blog/archives/</loc>
-    <lastmod>2014-10-19T12:03:30-04:00</lastmod>
+    <lastmod>2014-10-30T12:02:49-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://pcarranza.github.io/</loc>
-    <lastmod>2014-10-19T12:03:30-04:00</lastmod>
+    <lastmod>2014-10-30T12:02:49-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>

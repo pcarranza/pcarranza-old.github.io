@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Mysql, | Pablo C]]></title>
+  <link href="http://pcarranza.github.io/blog/categories/mysql/atom.xml" rel="self"/>
+  <link href="http://pcarranza.github.io/"/>
+  <updated>2014-10-30T12:02:49-04:00</updated>
+  <id>http://pcarranza.github.io/</id>
+  <author>
+    <name><![CDATA[Pablo C]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[About Beasts in the Wild]]></title>
+    <link href="http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild/"/>
+    <updated>2014-10-30T16:34:58-04:00</updated>
+    <id>http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild</id>
+    <content type="html"><![CDATA[<p>While learning how to tune a MySQL instance, all the tunning tools warned me not to
+assign memory beyond 80% of the available to innodb. They say this for a reason,
+but what reason is it?</p>
+
+<!--more-->
+
+
+<p>Long story short, I have a MySQL instance running with around 5M records on one
+particular table, I know for a fact that the indexes do not fit in memory, and
+I also have a nasty query that will force the index to be loaded in memory to
+resolve it.</p>
+
+<p>Let&rsquo;s see what happens when we tweak innodb buffer pool on one side or another.</p>
+
+<h2>Lets go big first</h2>
+
+<p>I have little memory on the host, only 512M, so it is not hard to go beyond that
+limit, if we assign a significant number to innodb the remaining memory is not much,
+so there is little room for failure.</p>
+
+<p>Let&rsquo;s play:</p>
+
+<p><code>cfg /etc/mysql/conf.d/innodb.cnf
+[mysqld]
+innodb_buffer_pool_size = 402653184
+innodb_file_per_table = 1
+innodb_flush_method = O_DIRECT
+query_cache_type = 0
+</code></p>
+
+<p>That is roughly 400Mb out of 512, the 79% of the available memory dedicated to the
+innodb process. There are some other details in this configuration, but they are not
+relevant for this particular test.
+Innodb is going to use this memory basically for loading indexes into
+that memory, and stuff like that.</p>
+
+<p>So what would happen if I run a nasty query?</p>
+
+<p><code>mysql
+select max(one_thing), a_relevant_id
+from a_large_table where a_grouping_string_with_a_key like 'A_PARTIAL_GROUP-%' and other_key = 'VALUE'
+group by a_relevant_id;
+</code></p>
+
+<p>Nothing fancy, this query should find some max values and return 4 records, but
+while running it the result is:</p>
+
+<p>``` mysql
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect&hellip;
+Connection id:    36
+Current database: my_database</p>
+
+<p>ERROR 2013 (HY000): Lost connection to MySQL server during query
+```</p>
+
+<p>What has just happened?</p>
+
+<p>Let&rsquo;s take a look at the <code>vmstat</code> result sampling every 1 second while reproducing this behavior:</p>
+
+<p><code>
+procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
+ 0  0  27672 325712   2028  45212    0    0     0     0   24   30  1  1 98  0
+ 1  0  27668 300408   2028  45224    0    0 21408     0  373  719 42  5 45  4
+ 2  0  27664 251552   2028  45232    0    0 41648     0  451  596 79 10  0  3
+ 1  0  27664 199580   2028  45228    0    0 43040     0  349  432 81 12  0  1
+ 1  0  27664 130280   2036  45220    0    0 58384    40  391  511 82  9  0  2
+ 2  0  27664  86632   2036  45228    0    0 36864     0  433  414 87  5  0  0
+ 2  0  27664  44488   2036  45224    0    0 36832     0  336  299 87  6  0  0
+ 1  0  27664   6268   1356  32340    0    0 44112    44  362  438 82  8  0  2
+ 2  1  27660 437800    376   7012   20  168 30796   184  405  688 71 19  0  1
+ 0  0  27660 362444    924  20688    0    0 22580   156  727 1698 10 15 62  7
+ 0  0  27660 361692    932  21320    0    0   688     0   83  259  2  2 96  0
+ 0  0  27652 346440   1084  27352    4    0 13516     0  650 2576 14 11 65 10
+</code></p>
+
+<h2>The nature of the beasts</h2>
+
+<p>Both mysql and the OS are interesting beasts, if you take a look at the <code>vmstat</code>, mysql will start
+expanding memory usage when it needs to, reaching a point where all the buffer pool is assigned and
+used. Since these indexes do not fit in this buffer pool, all of it gets used.</p>
+
+<p>But the interesting part is that the query execution and expantion does not happen in the buffer
+pool, this memory space is reserved only to load indexes, so that is happening on the other
+21% remaining memory on the server. If we take a quick simple look at how this query is planned
+to be executed:</p>
+
+<p>``` mysql
+<strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><em> 1. row </em></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p>
+
+<pre><code>       id: 1
+</code></pre>
+
+<p>  select_type: SIMPLE</p>
+
+<pre><code>       ...
+  key_len: 32
+      ref: const
+     rows: 2427075
+ filtered: 100.00
+    Extra: Using where; Using temporary; Using filesort
+</code></pre>
+
+<p>1 row in set, 1 warning (0.00 sec)
+```</p>
+
+<p>It looks like it will roughly be 70mb of key usage only (key len in bytes, times the row count),
+even though MySQL will use a temporary table, it will only be used for storing the data before
+returning results. The key must be in memory to resolve the query. And the engine will need
+a bit more memory to play around this (sorting for ex).</p>
+
+<h2>So the OS kicks in</h2>
+
+<p>And kills MySQL, since the MySQL query resolution expands beyond available memory, the OS needs
+ to find someone to kill to get memory back.</p>
+
+<p><code>text /var/log/syslog
+Oct 29 06:40:38 localhost kernel: [13063165.642150] select 1 (init), adj 0, size 278, to kill
+Oct 29 06:40:38 localhost kernel: [13063165.642156] select 371 (rsyslogd), adj 0, size 539, to kill
+Oct 29 06:40:38 localhost kernel: [13063165.642162] select 19651 (mysqld), adj 0, size 111249, to kill
+Oct 29 06:40:38 localhost kernel: [13063165.642163] send sigkill to 19651 (mysqld), adj 0, size 111249
+Oct 29 06:40:38 localhost kernel: [13063165.698982] type=1400 audit(1414590038.324:30): apparmor="STATUS" operation="profile_replace" name="/usr/sbin/mysqld" pid=19784 comm="apparmor_parser"
+</code></p>
+
+<p>Taking a look at mysql log, this is all we get there:</p>
+
+<p><code>text /var/log/mysql/error.log
+InnoDB: The log sequence number in ibdata files does not match
+InnoDB: the log sequence number in the ib_logfiles!
+141029  6:40:38  InnoDB: Database was not shut down normally!
+InnoDB: Starting crash recovery.
+InnoDB: Reading tablespace information from the .ibd files...
+InnoDB: Restoring possible half-written data pages from the doublewrite
+InnoDB: buffer...
+141029  6:40:38  InnoDB: Waiting for the background threads to start
+</code></p>
+
+<p>MySQL did not see it coming.</p>
+
+<h2>And what if</h2>
+
+<p>We lower the memory for innodb to, say, half the available memory?</p>
+
+<p><code>cfg
+innodb_buffer_pool_size = 268435456
+</code></p>
+
+<p>And then run the query again?</p>
+
+<p><code>bash vmstat
+procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
+ 0  0  27320  48716  75292 222112    0    0     0     0   11   16  0  0 100  0
+ 1  0  27320  27512  75292 222192    0    0 17172     0  285  479 19  2 76  2
+ 1  0  27320   6260  74568 172164    0    0 63440     4  542 1253 68 22  0  5
+ 1  0  27320  76576  74516  46228    0    0 50144     0  380  599 78 14  0  3
+ 2  0  27320  36544  74516  46240    0    0 33744     0  341  847 78 14  0  5
+ 1  0  27320   6324  63108  44128    0    0 37904     0  362  506 79 14  0  3
+ 1  0  27320   6868  55400  43228    0    0 34784     0  330  299 91  4  0  0
+ 1  0  27320   6868  55408  43220    0    0 30720    44  335  232 93  1  0  3
+ 1  0  27320   6868  55408  43228    0    0 31760     0  330  235 95  2  0  1
+ 1  0  27320   6868  55408  43228    0    0 35856     0  348  261 89  4  0  3
+ 1  0  27320   6868  55408  43228    0    0 29712     0  330  242 92  1  0  3
+ 1  0  27320   6868  55408  43228    0    0 30688     0  335  222 89  5  0  3
+ 1  0  27320   6868  55408  43228    0    0 28704     0  330  265 91  1  0  4
+ 2  0  27320   6868  55408  43228    0    0 26640     0  329  208 88  6  0  2
+ 1  0  27320   6868  55408  43228    0    0 32800     0  341  245 92  2  0  2
+ 2  0  27320   6880  55408  43228    0    0 35888     0  353  269 90  3  0  4
+ 2  0  27320   6868  55408  43228    0    0 32784     0  340  298 88  4  0  4
+ 1  0  27320   6868  55416  43228    0    0 28696    52  349  223 90  3  0  3
+ 1  0  27320   6868  55416  43228    0    0 25648     0  334  201 90  3  0  5
+ 1  0  27320   6868  55416  43228    0    0 26640     0  325  199 93  2  0  1
+ 0  0  27320   6892  55416  43228    0    0  5120     0   62   69 13  0 86  1
+</code></p>
+
+<p><code>mysql
+4 rows in set (18.39 sec)
+</code></p>
+
+<p>Heavy usage of IO, but the query survives, and the server keeps running.</p>
+
+<h2>Conclusions</h2>
+
+<p>Both systems are acting like the kind of beasts they are, we only need to
+understand the nature of each to know what to expect.</p>
+
+<p>MySQL is expanding beyond the buffer pool, it is a program like any other
+and will use memory when it is needed, its configurations are to setup the
+maximum set of resources that will be assigned to it in exclusivity, but it
+ does not mean that it will not require some more on certain occasions.</p>
+
+<p>The OS will act in self defence, no questions asked, so watch out for that,
+and check your syslog when things get weird.</p>
+]]></content>
+  </entry>
+  
+</feed>

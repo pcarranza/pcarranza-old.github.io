@@ -1,0 +1,504 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>About Beasts in the Wild - Pablo C</title>
+  <meta name="author" content="Pablo C">
+
+  
+  <meta name="description" content="While learning how to tune a MySQL instance, all the tunning tools warned me not to
+assign memory beyond 80% of the available to innodb. They say &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Pablo C" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='//fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='//fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-55532910-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Pablo C</a></h1>
+  
+    <h2>dreadfully curious</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscription">
+  <li><a href="https://github.com/pcarranza" rel="subscribe-github" title="@pcarranza on GitHub">GitHub</a></li>
+</ul>
+  
+  
+  
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:pcarranza.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">About Beasts in the Wild</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-30T16:34:58-04:00" pubdate data-updated="true">2014-10-30</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>While learning how to tune a MySQL instance, all the tunning tools warned me not to
+assign memory beyond 80% of the available to innodb. They say this for a reason,
+but what reason is it?</p>
+
+<!--more-->
+
+
+<p>Long story short, I have a MySQL instance running with around 5M records on one
+particular table, I know for a fact that the indexes do not fit in memory, and
+I also have a nasty query that will force the index to be loaded in memory to
+resolve it.</p>
+
+<p>Let&rsquo;s see what happens when we tweak innodb buffer pool on one side or another.</p>
+
+<h2>Lets go big first</h2>
+
+<p>I have little memory on the host, only 512M, so it is not hard to go beyond that
+limit, if we assign a significant number to innodb the remaining memory is not much,
+so there is little room for failure.</p>
+
+<p>Let&rsquo;s play:</p>
+
+<figure class='code'><figcaption><span>/etc/mysql/conf.d/innodb.cnf</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='cfg'><span class='line'><span class="k">[mysqld]</span>
+</span><span class='line'><span class="na">innodb_buffer_pool_size</span> <span class="o">=</span> <span class="s">402653184</span>
+</span><span class='line'><span class="na">innodb_file_per_table</span> <span class="o">=</span> <span class="s">1</span>
+</span><span class='line'><span class="na">innodb_flush_method</span> <span class="o">=</span> <span class="s">O_DIRECT</span>
+</span><span class='line'><span class="na">query_cache_type</span> <span class="o">=</span> <span class="s">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That is roughly 400Mb out of 512, the 79% of the available memory dedicated to the
+innodb process. There are some other details in this configuration, but they are not
+relevant for this particular test.
+Innodb is going to use this memory basically for loading indexes into
+that memory, and stuff like that.</p>
+
+<p>So what would happen if I run a nasty query?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="k">select</span> <span class="nf">max</span><span class="p">(</span><span class="n">one_thing</span><span class="p">),</span> <span class="n">a_relevant_id</span>
+</span><span class='line'><span class="k">from</span> <span class="n">a_large_table</span> <span class="k">where</span> <span class="n">a_grouping_string_with_a_key</span> <span class="k">like</span> <span class="s1">&#39;A_PARTIAL_GROUP-%&#39;</span> <span class="k">and</span> <span class="n">other_key</span> <span class="o">=</span> <span class="s1">&#39;VALUE&#39;</span>
+</span><span class='line'><span class="k">group</span> <span class="k">by</span> <span class="n">a_relevant_id</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Nothing fancy, this query should find some max values and return 4 records, but
+while running it the result is:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">ERROR</span> <span class="mi">2006</span> <span class="p">(</span><span class="n">HY000</span><span class="p">):</span> <span class="n">MySQL</span> <span class="n">server</span> <span class="n">has</span> <span class="n">gone</span> <span class="n">away</span>
+</span><span class='line'><span class="n">No</span> <span class="n">connection</span><span class="p">.</span> <span class="n">Trying</span> <span class="k">to</span> <span class="n">reconnect</span><span class="p">...</span>
+</span><span class='line'><span class="n">Connection</span> <span class="n">id</span><span class="p">:</span>    <span class="mi">36</span>
+</span><span class='line'><span class="n">Current</span> <span class="k">database</span><span class="p">:</span> <span class="n">my_database</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ERROR</span> <span class="mi">2013</span> <span class="p">(</span><span class="n">HY000</span><span class="p">):</span> <span class="n">Lost</span> <span class="n">connection</span> <span class="k">to</span> <span class="n">MySQL</span> <span class="n">server</span> <span class="n">during</span> <span class="n">query</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>What has just happened?</p>
+
+<p>Let&rsquo;s take a look at the <code>vmstat</code> result sampling every 1 second while reproducing this behavior:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">procs</span> <span class="o">-----------</span><span class="n">memory</span><span class="o">--------</span><span class="c1">-- ---swap-- -----io---- -system-- ----cpu----</span>
+</span><span class='line'> <span class="n">r</span>  <span class="n">b</span>   <span class="n">swpd</span>   <span class="n">free</span>   <span class="n">buff</span>  <span class="n">cache</span>   <span class="n">si</span>   <span class="n">so</span>    <span class="n">bi</span>    <span class="n">bo</span>   <span class="k">in</span>   <span class="n">cs</span> <span class="n">us</span> <span class="n">sy</span> <span class="n">id</span> <span class="n">wa</span>
+</span><span class='line'> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">27672</span> <span class="mi">325712</span>   <span class="mi">2028</span>  <span class="mi">45212</span>    <span class="mi">0</span>    <span class="mi">0</span>     <span class="mi">0</span>     <span class="mi">0</span>   <span class="mi">24</span>   <span class="mi">30</span>  <span class="mi">1</span>  <span class="mi">1</span> <span class="mi">98</span>  <span class="mi">0</span>
+</span><span class='line'> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">27668</span> <span class="mi">300408</span>   <span class="mi">2028</span>  <span class="mi">45224</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">21408</span>     <span class="mi">0</span>  <span class="mi">373</span>  <span class="mi">719</span> <span class="mi">42</span>  <span class="mi">5</span> <span class="mi">45</span>  <span class="mi">4</span>
+</span><span class='line'> <span class="mi">2</span>  <span class="mi">0</span>  <span class="mi">27664</span> <span class="mi">251552</span>   <span class="mi">2028</span>  <span class="mi">45232</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">41648</span>     <span class="mi">0</span>  <span class="mi">451</span>  <span class="mi">596</span> <span class="mi">79</span> <span class="mi">10</span>  <span class="mi">0</span>  <span class="mi">3</span>
+</span><span class='line'> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">27664</span> <span class="mi">199580</span>   <span class="mi">2028</span>  <span class="mi">45228</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">43040</span>     <span class="mi">0</span>  <span class="mi">349</span>  <span class="mi">432</span> <span class="mi">81</span> <span class="mi">12</span>  <span class="mi">0</span>  <span class="mi">1</span>
+</span><span class='line'> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">27664</span> <span class="mi">130280</span>   <span class="mi">2036</span>  <span class="mi">45220</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">58384</span>    <span class="mi">40</span>  <span class="mi">391</span>  <span class="mi">511</span> <span class="mi">82</span>  <span class="mi">9</span>  <span class="mi">0</span>  <span class="mi">2</span>
+</span><span class='line'> <span class="mi">2</span>  <span class="mi">0</span>  <span class="mi">27664</span>  <span class="mi">86632</span>   <span class="mi">2036</span>  <span class="mi">45228</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">36864</span>     <span class="mi">0</span>  <span class="mi">433</span>  <span class="mi">414</span> <span class="mi">87</span>  <span class="mi">5</span>  <span class="mi">0</span>  <span class="mi">0</span>
+</span><span class='line'> <span class="mi">2</span>  <span class="mi">0</span>  <span class="mi">27664</span>  <span class="mi">44488</span>   <span class="mi">2036</span>  <span class="mi">45224</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">36832</span>     <span class="mi">0</span>  <span class="mi">336</span>  <span class="mi">299</span> <span class="mi">87</span>  <span class="mi">6</span>  <span class="mi">0</span>  <span class="mi">0</span>
+</span><span class='line'> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">27664</span>   <span class="mi">6268</span>   <span class="mi">1356</span>  <span class="mi">32340</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">44112</span>    <span class="mi">44</span>  <span class="mi">362</span>  <span class="mi">438</span> <span class="mi">82</span>  <span class="mi">8</span>  <span class="mi">0</span>  <span class="mi">2</span>
+</span><span class='line'> <span class="mi">2</span>  <span class="mi">1</span>  <span class="mi">27660</span> <span class="mi">437800</span>    <span class="mi">376</span>   <span class="mi">7012</span>   <span class="mi">20</span>  <span class="mi">168</span> <span class="mi">30796</span>   <span class="mi">184</span>  <span class="mi">405</span>  <span class="mi">688</span> <span class="mi">71</span> <span class="mi">19</span>  <span class="mi">0</span>  <span class="mi">1</span>
+</span><span class='line'> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">27660</span> <span class="mi">362444</span>    <span class="mi">924</span>  <span class="mi">20688</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">22580</span>   <span class="mi">156</span>  <span class="mi">727</span> <span class="mi">1698</span> <span class="mi">10</span> <span class="mi">15</span> <span class="mi">62</span>  <span class="mi">7</span>
+</span><span class='line'> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">27660</span> <span class="mi">361692</span>    <span class="mi">932</span>  <span class="mi">21320</span>    <span class="mi">0</span>    <span class="mi">0</span>   <span class="mi">688</span>     <span class="mi">0</span>   <span class="mi">83</span>  <span class="mi">259</span>  <span class="mi">2</span>  <span class="mi">2</span> <span class="mi">96</span>  <span class="mi">0</span>
+</span><span class='line'> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">27652</span> <span class="mi">346440</span>   <span class="mi">1084</span>  <span class="mi">27352</span>    <span class="mi">4</span>    <span class="mi">0</span> <span class="mi">13516</span>     <span class="mi">0</span>  <span class="mi">650</span> <span class="mi">2576</span> <span class="mi">14</span> <span class="mi">11</span> <span class="mi">65</span> <span class="mi">10</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>The nature of the beasts</h2>
+
+<p>Both mysql and the OS are interesting beasts, if you take a look at the <code>vmstat</code>, mysql will start
+expanding memory usage when it needs to, reaching a point where all the buffer pool is assigned and
+used. Since these indexes do not fit in this buffer pool, all of it gets used.</p>
+
+<p>But the interesting part is that the query execution and expantion does not happen in the buffer
+pool, this memory space is reserved only to load indexes, so that is happening on the other
+21% remaining memory on the server. If we take a quick simple look at how this query is planned
+to be executed:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="o">***************************</span> <span class="mi">1</span><span class="p">.</span> <span class="n">row</span> <span class="o">***************************</span>
+</span><span class='line'>           <span class="n">id</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="n">select_type</span><span class="p">:</span> <span class="n">SIMPLE</span>
+</span><span class='line'>           <span class="p">...</span>
+</span><span class='line'>      <span class="n">key_len</span><span class="p">:</span> <span class="mi">32</span>
+</span><span class='line'>          <span class="n">ref</span><span class="p">:</span> <span class="n">const</span>
+</span><span class='line'>         <span class="n">rows</span><span class="p">:</span> <span class="mi">2427075</span>
+</span><span class='line'>     <span class="n">filtered</span><span class="p">:</span> <span class="mi">100</span><span class="p">.</span><span class="mi">00</span>
+</span><span class='line'>        <span class="n">Extra</span><span class="p">:</span> <span class="k">Using</span> <span class="k">where</span><span class="p">;</span> <span class="k">Using</span> <span class="n">temporary</span><span class="p">;</span> <span class="k">Using</span> <span class="n">filesort</span>
+</span><span class='line'><span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span><span class="p">,</span> <span class="mi">1</span> <span class="nf">warning</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It looks like it will roughly be 70mb of key usage only (key len in bytes, times the row count),
+even though MySQL will use a temporary table, it will only be used for storing the data before
+returning results. The key must be in memory to resolve the query. And the engine will need
+a bit more memory to play around this (sorting for ex).</p>
+
+<h2>So the OS kicks in</h2>
+
+<p>And kills MySQL, since the MySQL query resolution expands beyond available memory, the OS needs
+ to find someone to kill to get memory back.</p>
+
+<figure class='code'><figcaption><span>/var/log/syslog</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.642150] select 1 (init), adj 0, size 278, to kill
+</span><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.642156] select 371 (rsyslogd), adj 0, size 539, to kill
+</span><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.642162] select 19651 (mysqld), adj 0, size 111249, to kill
+</span><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.642163] send sigkill to 19651 (mysqld), adj 0, size 111249
+</span><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.698982] type=1400 audit(1414590038.324:30): apparmor=&quot;STATUS&quot; operation=&quot;profile_replace&quot; name=&quot;/usr/sbin/mysqld&quot; pid=19784 comm=&quot;apparmor_parser&quot;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Taking a look at mysql log, this is all we get there:</p>
+
+<figure class='code'><figcaption><span>/var/log/mysql/error.log</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>InnoDB: The log sequence number in ibdata files does not match
+</span><span class='line'>InnoDB: the log sequence number in the ib_logfiles!
+</span><span class='line'>141029  6:40:38  InnoDB: Database was not shut down normally!
+</span><span class='line'>InnoDB: Starting crash recovery.
+</span><span class='line'>InnoDB: Reading tablespace information from the .ibd files...
+</span><span class='line'>InnoDB: Restoring possible half-written data pages from the doublewrite
+</span><span class='line'>InnoDB: buffer...
+</span><span class='line'>141029  6:40:38  InnoDB: Waiting for the background threads to start
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>MySQL did not see it coming.</p>
+
+<h2>And what if</h2>
+
+<p>We lower the memory for innodb to, say, half the available memory?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='cfg'><span class='line'><span class="na">innodb_buffer_pool_size</span> <span class="o">=</span> <span class="s">268435456</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And then run the query again?</p>
+
+<figure class='code'><figcaption><span>vmstat</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
+</span><span class='line'> r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
+</span><span class='line'> 0  0  27320  48716  75292 222112    0    0     0     0   11   16  0  0 100  0
+</span><span class='line'> 1  0  27320  27512  75292 222192    0    0 17172     0  285  479 19  2 76  2
+</span><span class='line'> 1  0  27320   6260  74568 172164    0    0 63440     4  542 1253 68 22  0  5
+</span><span class='line'> 1  0  27320  76576  74516  46228    0    0 50144     0  380  599 78 14  0  3
+</span><span class='line'> 2  0  27320  36544  74516  46240    0    0 33744     0  341  847 78 14  0  5
+</span><span class='line'> 1  0  27320   6324  63108  44128    0    0 37904     0  362  506 79 14  0  3
+</span><span class='line'> 1  0  27320   6868  55400  43228    0    0 34784     0  330  299 91  4  0  0
+</span><span class='line'> 1  0  27320   6868  55408  43220    0    0 30720    44  335  232 93  1  0  3
+</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 31760     0  330  235 95  2  0  1
+</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 35856     0  348  261 89  4  0  3
+</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 29712     0  330  242 92  1  0  3
+</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 30688     0  335  222 89  5  0  3
+</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 28704     0  330  265 91  1  0  4
+</span><span class='line'> 2  0  27320   6868  55408  43228    0    0 26640     0  329  208 88  6  0  2
+</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 32800     0  341  245 92  2  0  2
+</span><span class='line'> 2  0  27320   6880  55408  43228    0    0 35888     0  353  269 90  3  0  4
+</span><span class='line'> 2  0  27320   6868  55408  43228    0    0 32784     0  340  298 88  4  0  4
+</span><span class='line'> 1  0  27320   6868  55416  43228    0    0 28696    52  349  223 90  3  0  3
+</span><span class='line'> 1  0  27320   6868  55416  43228    0    0 25648     0  334  201 90  3  0  5
+</span><span class='line'> 1  0  27320   6868  55416  43228    0    0 26640     0  325  199 93  2  0  1
+</span><span class='line'> 0  0  27320   6892  55416  43228    0    0  5120     0   62   69 13  0 86  1
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="mi">4</span> <span class="n">rows</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">18</span><span class="p">.</span><span class="mi">39</span> <span class="n">sec</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Heavy usage of IO, but the query survives, and the server keeps running.</p>
+
+<h2>Conclusions</h2>
+
+<p>Both systems are acting like the kind of beasts they are, we only need to
+understand the nature of each to know what to expect.</p>
+
+<p>MySQL is expanding beyond the buffer pool, it is a program like any other
+and will use memory when it is needed, its configurations are to setup the
+maximum set of resources that will be assigned to it in exclusivity, but it
+ does not mean that it will not require some more on certain occasions.</p>
+
+<p>The OS will act in self defence, no questions asked, so watch out for that,
+and check your syslog when things get weird.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Authored by <span class="fn">Pablo C</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-30T16:34:58-04:00" pubdate data-updated="true">2014-10-30</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/linux/'>linux</a>, <a class='category' href='/blog/categories/mysql/'>mysql,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild/" data-via="pbl0c" data-counturl="http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/10/18/108-chars-have-to-be-enough-for-everybody/" title="Previous Post: 108 chars have to be enough for everybody">&laquo; 108 chars have to be enough for everybody</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Pablo C -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'pcarranza';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild/';
+        var disqus_url = 'http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
