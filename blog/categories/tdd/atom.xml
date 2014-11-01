@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Tdd | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/tdd/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-11-01T01:12:33-04:00</updated>
+  <updated>2014-11-01T13:19:50-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -26,9 +26,10 @@ You can tell if you see the old code, it is full with logging messages to check 
 <p>In the middle of the road, rhythmbox evolved, with <a href="http://www.gnome.org/gnome-3/">gnome-shell</a> rhythmbox adapted to <a href="http://www.gtk.org/">GTK3</a>, breaking a lot of things.
 And finally it also changed from python2 to python3, breaking the rest of things.</p>
 
-<p>There is a lot of work to do to bring it back. The way I use it is turn my mobile phone into a remote control for my music player: <a href="https://wiki.gnome.org/Apps/Rhythmbox">rhythmbox</a>,
- that way I can select what I want to hear without turning on the screen or reaching a keyboard, both things I&rsquo;m not able to do any time.
- I also like the idea of controlling everything from one device.</p>
+<p>There is a lot of work to do to bring it back.</p>
+
+<p>The way I use it is by turning my mobile phone into a remote control for my music player: <a href="https://wiki.gnome.org/Apps/Rhythmbox">rhythmbox</a>,
+ that way I can select what I want to hear without turning on the screen on my HTPC or reaching a keyboard, both things I&rsquo;m not usually able to, and also I am lazy.</p>
 
 <!--more-->
 
@@ -49,11 +50,11 @@ which was what I had in my old debian based rhythmbox on the TV box: I did not n
 <a href="https://github.com/pcarranza/rhythmweb">github</a> account, setup the project on <a href="https://travis-ci.org/pcarranza/rhythmweb">travis-ci</a>
 and the most important, add the <a href="https://coveralls.io/r/pcarranza/rhythmweb">badge with the coverage percentage</a>,
 so the shame becomes public.
-Also I added a roadmap to the readme, which in this case works as a wish list, all the things I want to happen to the project.</p>
+Then I added a roadmap to the readme, which in this case works as a wish list, all the things I want to happen to the project.</p>
 
 <h2>How to work with legacy code?</h2>
 
-<p><em>Legacy code</em> is any code that is not covered by a test. With that definition, you can write legacy code right away, you only need to code,
+<p><em>Legacy code</em> is any code that is in production, not covered by a test. With that definition, you can write legacy code right away, you only need to code,
 and not code tests.</p>
 
 <p>Initially this project had a coverage of a flawless <strong>0</strong>, so it was all legacy code.</p>
@@ -66,9 +67,9 @@ that is like skydiving with a backpack, any backpack, maybe you get lucky and it
 <p>This can be tricky, you can spend all your time chasing a 100% coverage number without adding any value to the code, I did that already and I know that nothing good comes out of it, so lets setup a ground rules:</p>
 
 <ul>
-<li>Coverage is a tool, not a goal: it&rsquo;s not about the 100% number, I have to agree with @dhh; coverage is not a magical metric that will make the code perfect, it is just a tool that will let you know what is being tested and what not, it&rsquo;s a matter of common sense to determine if it is enough or not to stop.</li>
-<li>No refactor until basic usage is covered: this is a basic, let&rsquo;s not introduce new bugs on a code that is bad enough.</li>
-<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so let&rsquo;s try to use actual objects when possible and keep mocks under control.</li>
+<li>Coverage is a tool, not a goal: it&rsquo;s not about the 100% number, I have to agree with @dhh; coverage is not a magical metric that will make the code perfect, it is just a tool that will let you know what is being tested and what not, it&rsquo;s a matter of common sense to determine if it is good enough to stop or not.</li>
+<li>No refactor until basic usage is covered: this is a basic, let&rsquo;s not introduce new bugs on a code that is bad enough already.</li>
+<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so let&rsquo;s try to use actual objects whenever possible and keep mocks under control.</li>
 <li>All changes will be made while using the tool (eat your own dogfood)</li>
 <li>Use travis and coveralls: for gamification</li>
 <li>Declare what is the direction of the project up from in the roadmap to keep focus</li>
