@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Limits | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/limits/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-10-30T12:02:49-04:00</updated>
+  <updated>2014-11-01T01:12:33-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -126,7 +126,7 @@ nor <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh_config+5">ssh_config</a> m
 say anything about this limitation.</p>
 
 <p>Even checking filesystems limits: there are <a href="http://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits">limits for file names</a>
-(normally 255 bytes); but at least with any modern ext4 of hfs+, which should be quite
+(normally 255 bytes); but at least in any modern ext4 of hfs+, which should be quite
 standard now, there is no specific limitation for the path size.</p>
 
 <p>But yeah, a socket file looks like a file, but it is not a file, so general filesystem
