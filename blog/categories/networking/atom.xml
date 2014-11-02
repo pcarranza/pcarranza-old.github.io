@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Networking | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/networking/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-11-01T13:19:50-04:00</updated>
+  <updated>2014-11-02T14:52:17-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -121,7 +121,7 @@ The main ssh connection will work but the rest will fail with weird messages lik
 &ldquo;hostname X not resolved&rdquo; because, in fact, the hostname cannot be resolved since
 your client is not piped into the right network.</p>
 
-<p>And this goes beyond, not <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh+1">ssh</a>
+<p>And this goes beyond, neither <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh+1">ssh</a>
 nor <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh_config+5">ssh_config</a> man pages
 say anything about this limitation.</p>
 
