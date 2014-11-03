@@ -137,7 +137,7 @@ This second implementation took less than a second in execution time.</p>
 
 <h2>Lets get some data</h2>
 
-<p>First let&rsquo;s use /usr/bin/time to try to understand at a 10km height view what is going on:</p>
+<p>First lets use /usr/bin/time to try to understand at a 10km height view what is going on:</p>
 
 <p><code>/usr/bin/time --verbose ../../bash_convert.sh</code></p>
 
@@ -167,11 +167,11 @@ This second implementation took less than a second in execution time.</p>
 </span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
 
 
-<p>The time difference is tremendous, let&rsquo;s dive a bit to figure out what is actually going on.</p>
+<p>The time difference is tremendous, lets dive a bit to figure out what is actually going on.</p>
 
 <h2>Profiling with strace</h2>
 
-<p>Strace itself will add a bit of overhead, let&rsquo;s begin running the command with a <code>time</code> up front
+<p>Strace itself will add a bit of overhead, lets begin running the command with a <code>time</code> up front
 to capture all the input in one file, including the strace overhead.</p>
 
 <p><code>/usr/bin/time --verbose strace -r -f executable 2&gt; bc.strace.out</code>
@@ -265,7 +265,7 @@ subprocesses are ruby interpreter executions.</p>
 <p>All that starts with spaces and then a time measurement belongs to the main process.
 But all that starts with <code>[pid xxxx]</code> belongs to a subprocess.</p>
 
-<p>So, let&rsquo;s split output into main-process and sub-processes:</p>
+<p>So, lets split output into main-process and sub-processes:</p>
 
 <p><code>grep -e '^ \+[0-9\.]\+ ' bc.strace.out | sed -e 's/^ *//g' &gt; bc.st.mp.out</code></p>
 

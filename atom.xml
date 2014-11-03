@@ -4,7 +4,7 @@
   <title><![CDATA[Pablo C]]></title>
   <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-11-02T14:52:17-05:00</updated>
+  <updated>2014-11-03T15:03:57-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -318,7 +318,7 @@ and check your syslog when things get weird.</p>
 <!--more-->
 
 
-<p>Now let&rsquo;s add one more char:</p>
+<p>Now lets add one more char:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -686,7 +686,7 @@ This second implementation took less than a second in execution time.</p>
 
 <h2>Lets get some data</h2>
 
-<p>First let&rsquo;s use /usr/bin/time to try to understand at a 10km height view what is going on:</p>
+<p>First lets use /usr/bin/time to try to understand at a 10km height view what is going on:</p>
 
 <p><code>/usr/bin/time --verbose ../../bash_convert.sh</code></p>
 
@@ -716,11 +716,11 @@ This second implementation took less than a second in execution time.</p>
 </span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
 
 
-<p>The time difference is tremendous, let&rsquo;s dive a bit to figure out what is actually going on.</p>
+<p>The time difference is tremendous, lets dive a bit to figure out what is actually going on.</p>
 
 <h2>Profiling with strace</h2>
 
-<p>Strace itself will add a bit of overhead, let&rsquo;s begin running the command with a <code>time</code> up front
+<p>Strace itself will add a bit of overhead, lets begin running the command with a <code>time</code> up front
 to capture all the input in one file, including the strace overhead.</p>
 
 <p><code>/usr/bin/time --verbose strace -r -f executable 2&gt; bc.strace.out</code>
@@ -814,7 +814,7 @@ subprocesses are ruby interpreter executions.</p>
 <p>All that starts with spaces and then a time measurement belongs to the main process.
 But all that starts with <code>[pid xxxx]</code> belongs to a subprocess.</p>
 
-<p>So, let&rsquo;s split output into main-process and sub-processes:</p>
+<p>So, lets split output into main-process and sub-processes:</p>
 
 <p><code>grep -e '^ \+[0-9\.]\+ ' bc.strace.out | sed -e 's/^ *//g' &gt; bc.st.mp.out</code></p>
 
@@ -1159,7 +1159,7 @@ Shame on me, as I ignored the project for a long time, mainly because I did not 
 But I do need it back, or maybe it is just that I have some time to dedicate to it, plus I feel embarrassed by that code:
 never underestimate the power of public shame.</p>
 
-<p>Let&rsquo;s face it, I did not wanted to change a thing, it was still kinda running on rhythmbox on gtk3, python2.7,
+<p>Lets face it, I did not wanted to change a thing, it was still kinda running on rhythmbox on gtk3, python2.7,
 which was what I had in my old debian based rhythmbox on the TV box: I did not needed to code anything to use it&hellip;</p>
 
 <h2>The public shame</h2>
@@ -1186,8 +1186,8 @@ that is like skydiving with a backpack, any backpack, maybe you get lucky and it
 
 <ul>
 <li>Coverage is a tool, not a goal: it&rsquo;s not about the 100% number, I have to agree with @dhh; coverage is not a magical metric that will make the code perfect, it is just a tool that will let you know what is being tested and what not, it&rsquo;s a matter of common sense to determine if it is good enough to stop or not.</li>
-<li>No refactor until basic usage is covered: this is a basic, let&rsquo;s not introduce new bugs on a code that is bad enough already.</li>
-<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so let&rsquo;s try to use actual objects whenever possible and keep mocks under control.</li>
+<li>No refactor until basic usage is covered: this is a basic, to avoid introducing new bugs on a code base that is bad enough already.</li>
+<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so lets try to use actual objects whenever possible and keep mocks under control.</li>
 <li>All changes will be made while using the tool (eat your own dogfood)</li>
 <li>Use travis and coveralls: for gamification</li>
 <li>Declare what is the direction of the project up from in the roadmap to keep focus</li>

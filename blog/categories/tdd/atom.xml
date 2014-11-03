@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Tdd | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/tdd/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-11-02T14:52:17-05:00</updated>
+  <updated>2014-11-03T15:03:57-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -41,7 +41,7 @@ Shame on me, as I ignored the project for a long time, mainly because I did not 
 But I do need it back, or maybe it is just that I have some time to dedicate to it, plus I feel embarrassed by that code:
 never underestimate the power of public shame.</p>
 
-<p>Let&rsquo;s face it, I did not wanted to change a thing, it was still kinda running on rhythmbox on gtk3, python2.7,
+<p>Lets face it, I did not wanted to change a thing, it was still kinda running on rhythmbox on gtk3, python2.7,
 which was what I had in my old debian based rhythmbox on the TV box: I did not needed to code anything to use it&hellip;</p>
 
 <h2>The public shame</h2>
@@ -68,8 +68,8 @@ that is like skydiving with a backpack, any backpack, maybe you get lucky and it
 
 <ul>
 <li>Coverage is a tool, not a goal: it&rsquo;s not about the 100% number, I have to agree with @dhh; coverage is not a magical metric that will make the code perfect, it is just a tool that will let you know what is being tested and what not, it&rsquo;s a matter of common sense to determine if it is good enough to stop or not.</li>
-<li>No refactor until basic usage is covered: this is a basic, let&rsquo;s not introduce new bugs on a code that is bad enough already.</li>
-<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so let&rsquo;s try to use actual objects whenever possible and keep mocks under control.</li>
+<li>No refactor until basic usage is covered: this is a basic, to avoid introducing new bugs on a code base that is bad enough already.</li>
+<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so lets try to use actual objects whenever possible and keep mocks under control.</li>
 <li>All changes will be made while using the tool (eat your own dogfood)</li>
 <li>Use travis and coveralls: for gamification</li>
 <li>Declare what is the direction of the project up from in the roadmap to keep focus</li>

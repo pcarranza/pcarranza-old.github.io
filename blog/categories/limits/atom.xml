@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Limits | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/limits/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-11-02T14:52:17-05:00</updated>
+  <updated>2014-11-03T15:03:57-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -35,7 +35,7 @@ Socket.unix_server_socket(socket_file)
 <!--more-->
 
 
-<p>Now let&rsquo;s add one more char:</p>
+<p>Now lets add one more char:</p>
 
 <p>``` ruby</p>
 
