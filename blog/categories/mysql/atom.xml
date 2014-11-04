@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Mysql, | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/mysql/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-11-03T15:03:57-05:00</updated>
+  <updated>2014-11-04T08:38:26-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo C]]></name>
@@ -101,10 +101,10 @@ procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
 expanding memory usage when it needs to, reaching a point where all the buffer pool is assigned and
 used. Since these indexes do not fit in this buffer pool, all of it gets used.</p>
 
-<p>But the interesting part is that the query execution and expantion does not happen in the buffer
+<p>But the interesting part is that the query execution and expansion does not happen in the buffer
 pool, this memory space is reserved only to load indexes, so that is happening on the other
-21% remaining memory on the server. If we take a quick simple look at how this query is planned
-to be executed:</p>
+21% remaining memory on the server, on the heap. If we take a quick simple look at how this
+query is planned to be executed:</p>
 
 <p>``` mysql
 <strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><em> 1. row </em></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p>

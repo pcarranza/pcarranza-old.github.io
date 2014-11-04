@@ -228,10 +228,10 @@ while running it the result is:</p>
 expanding memory usage when it needs to, reaching a point where all the buffer pool is assigned and
 used. Since these indexes do not fit in this buffer pool, all of it gets used.</p>
 
-<p>But the interesting part is that the query execution and expantion does not happen in the buffer
+<p>But the interesting part is that the query execution and expansion does not happen in the buffer
 pool, this memory space is reserved only to load indexes, so that is happening on the other
-21% remaining memory on the server. If we take a quick simple look at how this query is planned
-to be executed:</p>
+21% remaining memory on the server, on the heap. If we take a quick simple look at how this
+query is planned to be executed:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
