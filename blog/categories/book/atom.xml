@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Book | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/book/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-12-29T18:32:11-05:00</updated>
+  <updated>2014-12-29T18:58:11-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -61,69 +61,84 @@ can I gain from writing my code in such way?</p>
 
 <p>Check this gist:</p>
 
-<p><div><script src='https://gist.github.com/64f77136549ca7422574.js?file=load_id_rsa.rb'></script>
-<noscript><pre><code>def load_rsa_key(key)
-  case key
-    when nil
-      raise ArgumentError, &quot;Key cannot be nil&quot;
-    when OpenSSL::PKey::PKey
-      key
-    when String, File, IO
-      text = read_file(key)
-      if text =~ /^ssh-rsa/
-        load_ssh_pubkey text
-      else
-        OpenSSL::PKey.read text
-      end
-    end
-end
+<p>``` ruby load_id_rsa.rb
+def load_rsa_key(key)
+  case key</p>
 
-private 
-
-def load_ssh_pubkey(text)
-  rsakey = OpenSSL::PKey::RSA.new
-  text.lines.each do |line|
-    base64 = line.chomp.split[1]
-    keydata = base64.unpack(&quot;m&quot;).first
-    parts = Array.new
-    while (keydata.length &gt; 0)
-      dlen = keydata[0, 4].bytes.inject(0) do |a, b|
-        (a &lt;&lt; 8) + b
-      end
-      data = keydata[4, dlen]
-      keydata = keydata[(dlen + 4)..-1]
-      parts.push(data)
-    end
-    type = parts[0]
-    raise ArgumentError, &quot;Unsupported key type #{type}&quot; unless type == &quot;ssh-rsa&quot;
-    e = parts[1].bytes.inject do |a, b|
-      (a &lt;&lt; 8) + b
-    end
-    n = parts[2].bytes.inject do |a, b|
-      (a &lt;&lt; 8) + b
-    end
-    rsakey.n = n
-    rsakey.e = e
-  end
-  rsakey
-end
-
-def read_file file
-  f = open_file file, &#39;r&#39;
-  f.read
-end
-  
-def open_file file, mode
-  case file
-  when String
-    File.open file, mode
-  when File, IO
-    file
+<pre><code>when nil
+  raise ArgumentError, "Key cannot be nil"
+when OpenSSL::PKey::PKey
+  key
+when String, File, IO
+  text = read_file(key)
+  if text =~ /^ssh-rsa/
+    load_ssh_pubkey text
   else
-    raise ArgumentError, &quot;Invalid file #{file}&quot;
+    OpenSSL::PKey.read text
   end
-end</code></pre></noscript></div>
-</p>
+end
+</code></pre>
+
+<p>end</p>
+
+<p>private</p>
+
+<p>def load_ssh_pubkey(text)
+  rsakey = OpenSSL::PKey::RSA.new
+  text.lines.each do |line|</p>
+
+<pre><code>base64 = line.chomp.split[1]
+keydata = base64.unpack("m").first
+parts = Array.new
+while (keydata.length &gt; 0)
+  dlen = keydata[0, 4].bytes.inject(0) do |a, b|
+    (a &lt;&lt; 8) + b
+  end
+  data = keydata[4, dlen]
+  keydata = keydata[(dlen + 4)..-1]
+  parts.push(data)
+end
+type = parts[0]
+raise ArgumentError, "Unsupported key type #{type}" unless type == "ssh-rsa"
+e = parts[1].bytes.inject do |a, b|
+  (a &lt;&lt; 8) + b
+end
+n = parts[2].bytes.inject do |a, b|
+  (a &lt;&lt; 8) + b
+end
+rsakey.n = n
+rsakey.e = e
+</code></pre>
+
+<p>  end
+  rsakey
+end</p>
+
+<p>def read_file file
+  f = open_file file, &lsquo;r&rsquo;
+  f.read
+end</p>
+
+<p>def open_file file, mode
+  case file
+  when String</p>
+
+<pre><code>File.open file, mode
+</code></pre>
+
+<p>  when File, IO</p>
+
+<pre><code>file
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>raise ArgumentError, "Invalid file #{file}"
+</code></pre>
+
+<p>  end
+end
+```</p>
 
 <p>Focus on one function <code>load_ssh_pubkey</code>. It does a non trivial thing
 (at least not for me) which is parsing and building a
@@ -151,59 +166,72 @@ data, delivering a key as a side effect if it is not killed in the way.</p>
 
 <p>Extracted from the <em>rebuild</em> branch:</p>
 
-<p><div><script src='https://gist.github.com/a3e8b58418bbe03af518.js?file=ssh_key.rb'></script>
-<noscript><pre><code>class SSHKey
+<p>``` ruby ssh_key.rb
+class SSHKey</p>
 
-  attr_reader :rsa
+<p>  attr_reader :rsa</p>
 
-  def initialize(args={})
-    source_file = args.fetch(:file) { fail ArgumentError, &quot;Filename is required&quot; }
-    source = if source_file.respond_to?(:read)
-               source_file.read()
-             else
-               File.open(source_file) do |file|
-                 file.read()
-               end
-             end
-    @rsa = load_ssh_rsa_key(source)
-    @rsa ||= OpenSSL::PKey.read(source)
-  end
+<p>  def initialize(args={})</p>
 
-  private
+<pre><code>source_file = args.fetch(:file) { fail ArgumentError, "Filename is required" }
+source = if source_file.respond_to?(:read)
+           source_file.read()
+         else
+           File.open(source_file) do |file|
+             file.read()
+           end
+         end
+@rsa = load_ssh_rsa_key(source)
+@rsa ||= OpenSSL::PKey.read(source)
+</code></pre>
 
-  def load_ssh_rsa_key(source)
-    fail &quot;DSA is not supported&quot; if source =~ /^ssh-dsa/
-    return nil unless source =~ /^ssh-rsa/
+<p>  end</p>
 
-    keydata = decode_key(source)
+<p>  private</p>
 
-    skip_key_type_length = parse_data(keydata.slice!(0, 4))
-    keydata.slice!(0, skip_key_type_length)
+<p>  def load_ssh_rsa_key(source)</p>
 
-    rsakey = OpenSSL::PKey::RSA.new
-    exponent_length = parse_data(keydata.slice!(0, 4))
-    rsakey.e = parse_data(keydata.slice!(0, exponent_length))
+<pre><code>fail "DSA is not supported" if source =~ /^ssh-dsa/
+return nil unless source =~ /^ssh-rsa/
 
-    modulus_length = parse_data(keydata.slice!(0, 4))
-    rsakey.n = parse_data(keydata.slice!(0, modulus_length))
+keydata = decode_key(source)
 
-    @rsa = rsakey
-  end
+rsakey = OpenSSL::PKey::RSA.new
 
-  def decode_key(source)
-    base64 = source.chomp.split[1]
-    keydata = base64.unpack(&quot;m&quot;).first
-    keydata
-  end
+skip_key_type_length = bytes_to_number(keydata.slice!(0, 4))
+keydata.slice!(0, skip_key_type_length)
 
-  def parse_data(data)
-    data.bytes.inject(0) do |sum, byte|
-      (sum &lt;&lt; 8) + byte
-    end
-  end
+exponent_length = bytes_to_number(keydata.slice!(0, 4))
+rsakey.e = bytes_to_number(keydata.slice!(0, exponent_length))
 
-end</code></pre></noscript></div>
-</p>
+modulus_length = bytes_to_number(keydata.slice!(0, 4))
+rsakey.n = bytes_to_number(keydata.slice!(0, modulus_length))
+
+@rsa = rsakey
+</code></pre>
+
+<p>  end</p>
+
+<p>  def decode_key(source)</p>
+
+<pre><code>base64 = source.chomp.split[1]
+keydata = base64.unpack("m").first
+keydata
+</code></pre>
+
+<p>  end</p>
+
+<p>  def bytes_to_number(data)</p>
+
+<pre><code>data.bytes.inject(0) do |sum, byte|
+  (sum &lt;&lt; 8) + byte
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>end
+```</p>
 
 <p>In this case I&rsquo;m trying to follow Avdi&rsquo;s ideas: readability and telling a story matters.
 Given that I&rsquo;m in the process of turning this <a href="https://github.com/pcarranza/zssl">console tool</a>

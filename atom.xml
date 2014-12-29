@@ -4,7 +4,7 @@
   <title><![CDATA[Pablo C]]></title>
   <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2014-12-29T18:32:11-05:00</updated>
+  <updated>2014-12-29T18:58:11-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -452,7 +452,7 @@ I know this because I checked using a query as simple as this:</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>or:</p>
+<p>or</p>
 
 <figure class='code'><figcaption><span>for a specific table</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1692,68 +1692,129 @@ can I gain from writing my code in such way?</p>
 
 <p>Check this gist:</p>
 
-<div><script src='https://gist.github.com/64f77136549ca7422574.js?file=load_id_rsa.rb'></script>
-<noscript><pre><code>def load_rsa_key(key)
-  case key
-    when nil
-      raise ArgumentError, &quot;Key cannot be nil&quot;
-    when OpenSSL::PKey::PKey
-      key
-    when String, File, IO
-      text = read_file(key)
-      if text =~ /^ssh-rsa/
-        load_ssh_pubkey text
-      else
-        OpenSSL::PKey.read text
-      end
-    end
-end
-
-private 
-
-def load_ssh_pubkey(text)
-  rsakey = OpenSSL::PKey::RSA.new
-  text.lines.each do |line|
-    base64 = line.chomp.split[1]
-    keydata = base64.unpack(&quot;m&quot;).first
-    parts = Array.new
-    while (keydata.length &gt; 0)
-      dlen = keydata[0, 4].bytes.inject(0) do |a, b|
-        (a &lt;&lt; 8) + b
-      end
-      data = keydata[4, dlen]
-      keydata = keydata[(dlen + 4)..-1]
-      parts.push(data)
-    end
-    type = parts[0]
-    raise ArgumentError, &quot;Unsupported key type #{type}&quot; unless type == &quot;ssh-rsa&quot;
-    e = parts[1].bytes.inject do |a, b|
-      (a &lt;&lt; 8) + b
-    end
-    n = parts[2].bytes.inject do |a, b|
-      (a &lt;&lt; 8) + b
-    end
-    rsakey.n = n
-    rsakey.e = e
-  end
-  rsakey
-end
-
-def read_file file
-  f = open_file file, &#39;r&#39;
-  f.read
-end
-  
-def open_file file, mode
-  case file
-  when String
-    File.open file, mode
-  when File, IO
-    file
-  else
-    raise ArgumentError, &quot;Invalid file #{file}&quot;
-  end
-end</code></pre></noscript></div>
+<figure class='code'><figcaption><span>load_id_rsa.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">load_rsa_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">case</span> <span class="n">key</span>
+</span><span class='line'>    <span class="k">when</span> <span class="kp">nil</span>
+</span><span class='line'>      <span class="k">raise</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s2">&quot;Key cannot be nil&quot;</span>
+</span><span class='line'>    <span class="k">when</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">::</span><span class="no">PKey</span>
+</span><span class='line'>      <span class="n">key</span>
+</span><span class='line'>    <span class="k">when</span> <span class="nb">String</span><span class="p">,</span> <span class="no">File</span><span class="p">,</span> <span class="no">IO</span>
+</span><span class='line'>      <span class="n">text</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">if</span> <span class="n">text</span> <span class="o">=~</span> <span class="sr">/^ssh-rsa/</span>
+</span><span class='line'>        <span class="n">load_ssh_pubkey</span> <span class="n">text</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">.</span><span class="n">read</span> <span class="n">text</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">load_ssh_pubkey</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">rsakey</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">::</span><span class="no">RSA</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="n">text</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">line</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">base64</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">chomp</span><span class="o">.</span><span class="n">split</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>    <span class="n">keydata</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'>    <span class="n">parts</span> <span class="o">=</span> <span class="nb">Array</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>    <span class="k">while</span> <span class="p">(</span><span class="n">keydata</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">dlen</span> <span class="o">=</span> <span class="n">keydata</span><span class="o">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="o">].</span><span class="n">bytes</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">|</span>
+</span><span class='line'>        <span class="p">(</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>      <span class="n">data</span> <span class="o">=</span> <span class="n">keydata</span><span class="o">[</span><span class="mi">4</span><span class="p">,</span> <span class="n">dlen</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">keydata</span> <span class="o">=</span> <span class="n">keydata</span><span class="o">[</span><span class="p">(</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>      <span class="n">parts</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">type</span> <span class="o">=</span> <span class="n">parts</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>    <span class="k">raise</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s2">&quot;Unsupported key type </span><span class="si">#{</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">unless</span> <span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;ssh-rsa&quot;</span>
+</span><span class='line'>    <span class="n">e</span> <span class="o">=</span> <span class="n">parts</span><span class="o">[</span><span class="mi">1</span><span class="o">].</span><span class="n">bytes</span><span class="o">.</span><span class="n">inject</span> <span class="k">do</span> <span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">|</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">n</span> <span class="o">=</span> <span class="n">parts</span><span class="o">[</span><span class="mi">2</span><span class="o">].</span><span class="n">bytes</span><span class="o">.</span><span class="n">inject</span> <span class="k">do</span> <span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">|</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="n">rsakey</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
+</span><span class='line'>    <span class="n">rsakey</span><span class="o">.</span><span class="n">e</span> <span class="o">=</span> <span class="n">e</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">rsakey</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">read_file</span> <span class="n">file</span>
+</span><span class='line'>  <span class="n">f</span> <span class="o">=</span> <span class="n">open_file</span> <span class="n">file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span>
+</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">open_file</span> <span class="n">file</span><span class="p">,</span> <span class="n">mode</span>
+</span><span class='line'>  <span class="k">case</span> <span class="n">file</span>
+</span><span class='line'>  <span class="k">when</span> <span class="nb">String</span>
+</span><span class='line'>    <span class="no">File</span><span class="o">.</span><span class="n">open</span> <span class="n">file</span><span class="p">,</span> <span class="n">mode</span>
+</span><span class='line'>  <span class="k">when</span> <span class="no">File</span><span class="p">,</span> <span class="no">IO</span>
+</span><span class='line'>    <span class="n">file</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="k">raise</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s2">&quot;Invalid file </span><span class="si">#{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Focus on one function <code>load_ssh_pubkey</code>. It does a non trivial thing
@@ -1782,58 +1843,111 @@ data, delivering a key as a side effect if it is not killed in the way.</p>
 
 <p>Extracted from the <em>rebuild</em> branch:</p>
 
-<div><script src='https://gist.github.com/a3e8b58418bbe03af518.js?file=ssh_key.rb'></script>
-<noscript><pre><code>class SSHKey
-
-  attr_reader :rsa
-
-  def initialize(args={})
-    source_file = args.fetch(:file) { fail ArgumentError, &quot;Filename is required&quot; }
-    source = if source_file.respond_to?(:read)
-               source_file.read()
-             else
-               File.open(source_file) do |file|
-                 file.read()
-               end
-             end
-    @rsa = load_ssh_rsa_key(source)
-    @rsa ||= OpenSSL::PKey.read(source)
-  end
-
-  private
-
-  def load_ssh_rsa_key(source)
-    fail &quot;DSA is not supported&quot; if source =~ /^ssh-dsa/
-    return nil unless source =~ /^ssh-rsa/
-
-    keydata = decode_key(source)
-
-    skip_key_type_length = parse_data(keydata.slice!(0, 4))
-    keydata.slice!(0, skip_key_type_length)
-
-    rsakey = OpenSSL::PKey::RSA.new
-    exponent_length = parse_data(keydata.slice!(0, 4))
-    rsakey.e = parse_data(keydata.slice!(0, exponent_length))
-
-    modulus_length = parse_data(keydata.slice!(0, 4))
-    rsakey.n = parse_data(keydata.slice!(0, modulus_length))
-
-    @rsa = rsakey
-  end
-
-  def decode_key(source)
-    base64 = source.chomp.split[1]
-    keydata = base64.unpack(&quot;m&quot;).first
-    keydata
-  end
-
-  def parse_data(data)
-    data.bytes.inject(0) do |sum, byte|
-      (sum &lt;&lt; 8) + byte
-    end
-  end
-
-end</code></pre></noscript></div>
+<figure class='code'><figcaption><span>ssh_key.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">SSHKey</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:rsa</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">{})</span>
+</span><span class='line'>    <span class="n">source_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:file</span><span class="p">)</span> <span class="p">{</span> <span class="nb">fail</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s2">&quot;Filename is required&quot;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">source</span> <span class="o">=</span> <span class="k">if</span> <span class="n">source_file</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:read</span><span class="p">)</span>
+</span><span class='line'>               <span class="n">source_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span class='line'>             <span class="k">else</span>
+</span><span class='line'>               <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">source_file</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
+</span><span class='line'>                 <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span class='line'>               <span class="k">end</span>
+</span><span class='line'>             <span class="k">end</span>
+</span><span class='line'>    <span class="vi">@rsa</span> <span class="o">=</span> <span class="n">load_ssh_rsa_key</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@rsa</span> <span class="o">||=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">load_ssh_rsa_key</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">fail</span> <span class="s2">&quot;DSA is not supported&quot;</span> <span class="k">if</span> <span class="n">source</span> <span class="o">=~</span> <span class="sr">/^ssh-dsa/</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kp">nil</span> <span class="k">unless</span> <span class="n">source</span> <span class="o">=~</span> <span class="sr">/^ssh-rsa/</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">keydata</span> <span class="o">=</span> <span class="n">decode_key</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">rsakey</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">::</span><span class="no">RSA</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">skip_key_type_length</span> <span class="o">=</span> <span class="n">bytes_to_number</span><span class="p">(</span><span class="n">keydata</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</span><span class='line'>    <span class="n">keydata</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_key_type_length</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">exponent_length</span> <span class="o">=</span> <span class="n">bytes_to_number</span><span class="p">(</span><span class="n">keydata</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</span><span class='line'>    <span class="n">rsakey</span><span class="o">.</span><span class="n">e</span> <span class="o">=</span> <span class="n">bytes_to_number</span><span class="p">(</span><span class="n">keydata</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">exponent_length</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">modulus_length</span> <span class="o">=</span> <span class="n">bytes_to_number</span><span class="p">(</span><span class="n">keydata</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</span><span class='line'>    <span class="n">rsakey</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">bytes_to_number</span><span class="p">(</span><span class="n">keydata</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">modulus_length</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="vi">@rsa</span> <span class="o">=</span> <span class="n">rsakey</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">decode_key</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">base64</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">chomp</span><span class="o">.</span><span class="n">split</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>    <span class="n">keydata</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'>    <span class="n">keydata</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">bytes_to_number</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">data</span><span class="o">.</span><span class="n">bytes</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">sum</span><span class="p">,</span> <span class="n">byte</span><span class="o">|</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">sum</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">byte</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>In this case I&rsquo;m trying to follow Avdi&rsquo;s ideas: readability and telling a story matters.
