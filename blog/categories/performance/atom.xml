@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Mysql | Pablo C]]></title>
-  <link href="http://pcarranza.github.io/blog/categories/mysql/atom.xml" rel="self"/>
+  <title><![CDATA[Category: Performance | Pablo C]]></title>
+  <link href="http://pcarranza.github.io/blog/categories/performance/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
   <updated>2014-12-29T18:32:11-05:00</updated>
   <id>http://pcarranza.github.io/</id>

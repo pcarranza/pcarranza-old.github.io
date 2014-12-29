@@ -1,24 +1,122 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Pablo C]]></title>
-  <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
-  <link href="http://pcarranza.github.io/"/>
-  <updated>2014-12-29T18:32:11-05:00</updated>
-  <id>http://pcarranza.github.io/</id>
-  <author>
-    <name><![CDATA[Pablo Carranza]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Understanding MySql Degradation - Pablo C</title>
+  <meta name="author" content="Pablo Carranza">
 
   
-  <entry>
-    <title type="html"><![CDATA[Understanding MySql Degradation]]></title>
-    <link href="http://pcarranza.github.io/blog/2014/12/29/understanding-mysql-degradation/"/>
-    <updated>2014-12-29T13:45:17-05:00</updated>
-    <id>http://pcarranza.github.io/blog/2014/12/29/understanding-mysql-degradation</id>
-    <content type="html"><![CDATA[<p>This post is neither about magical configurations, nor about baremetal IO ops,
+  <meta name="description" content="This post is neither about magical configurations, nor about baremetal IO ops,
+nor about if you should move your database server to SSD. Neither it &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pcarranza.github.io/blog/2014/12/29/understanding-mysql-degradation">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Pablo C" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-55532910-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Pablo C</a></h1>
+  
+    <h2>dreadfully curious</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/pcarranza" rel="subscribe-github" title="@pcarranza on GitHub"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="pcarranza.github.io" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Understanding MySql Degradation</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>This post is neither about magical configurations, nor about baremetal IO ops,
 nor about if you should move your database server to SSD. Neither it is about
 fine tuning a MySQL server configuration, not even about how MySQL works as a
 cluster.</p>
@@ -1208,1192 +1306,116 @@ your queries, understand how you database server works and where the limits are.
 <p>The best you can do is setup your data in a way that the access to it is just
 direct and natural, throwing more hardware at a problem is not always the
 solution, it is just delaying the problem.</p>
-]]></content>
-  </entry>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
   
-  <entry>
-    <title type="html"><![CDATA[About Beasts in the Wild]]></title>
-    <link href="http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild/"/>
-    <updated>2014-10-30T16:34:58-04:00</updated>
-    <id>http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild</id>
-    <content type="html"><![CDATA[<p>While learning how to tune a MySQL instance, all the tunning tools warned me not to
-assign memory beyond 80% of the available to innodb. They say this for a reason,
-but what reason is it?</p>
-
-<!--more-->
-
-
-<p>Long story short, I have a MySQL instance running with around 5M records on one
-particular table, I know for a fact that the indexes do not fit in memory, and
-I also have a nasty query that will force the index to be loaded in memory to
-resolve it.</p>
-
-<p>Let&rsquo;s see what happens when we tweak innodb buffer pool on one side or another.</p>
-
-<h2>Lets go big first</h2>
-
-<p>I have little memory on the host, only 512M, so it is not hard to go beyond that
-limit, if we assign a significant number to innodb the remaining memory is not much,
-so there is little room for failure.</p>
-
-<p>Let&rsquo;s play:</p>
-
-<figure class='code'><figcaption><span>/etc/mysql/conf.d/innodb.cnf</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='cfg'><span class='line'><span class="k">[mysqld]</span>
-</span><span class='line'><span class="na">innodb_buffer_pool_size</span> <span class="o">=</span> <span class="s">402653184</span>
-</span><span class='line'><span class="na">innodb_file_per_table</span> <span class="o">=</span> <span class="s">1</span>
-</span><span class='line'><span class="na">innodb_flush_method</span> <span class="o">=</span> <span class="s">O_DIRECT</span>
-</span><span class='line'><span class="na">query_cache_type</span> <span class="o">=</span> <span class="s">0</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>That is roughly 400Mb out of 512, the 79% of the available memory dedicated to the
-innodb process. There are some other details in this configuration, but they are not
-relevant for this particular test.
-Innodb is going to use this memory basically for loading indexes into
-that memory, and stuff like that.</p>
-
-<p>So what would happen if I run a nasty query?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="k">select</span> <span class="nf">max</span><span class="p">(</span><span class="n">one_thing</span><span class="p">),</span> <span class="n">a_relevant_id</span>
-</span><span class='line'><span class="k">from</span> <span class="n">a_large_table</span> <span class="k">where</span> <span class="n">a_grouping_string_with_a_key</span> <span class="k">like</span> <span class="s1">&#39;A_PARTIAL_GROUP-%&#39;</span> <span class="k">and</span> <span class="n">other_key</span> <span class="o">=</span> <span class="s1">&#39;VALUE&#39;</span>
-</span><span class='line'><span class="k">group</span> <span class="k">by</span> <span class="n">a_relevant_id</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Nothing fancy, this query should find some max values and return 4 records, but
-while running it the result is:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">ERROR</span> <span class="mi">2006</span> <span class="p">(</span><span class="n">HY000</span><span class="p">):</span> <span class="n">MySQL</span> <span class="n">server</span> <span class="n">has</span> <span class="n">gone</span> <span class="n">away</span>
-</span><span class='line'><span class="n">No</span> <span class="n">connection</span><span class="p">.</span> <span class="n">Trying</span> <span class="k">to</span> <span class="n">reconnect</span><span class="p">...</span>
-</span><span class='line'><span class="n">Connection</span> <span class="n">id</span><span class="p">:</span>    <span class="mi">36</span>
-</span><span class='line'><span class="n">Current</span> <span class="k">database</span><span class="p">:</span> <span class="n">my_database</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">ERROR</span> <span class="mi">2013</span> <span class="p">(</span><span class="n">HY000</span><span class="p">):</span> <span class="n">Lost</span> <span class="n">connection</span> <span class="k">to</span> <span class="n">MySQL</span> <span class="n">server</span> <span class="n">during</span> <span class="n">query</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>What has just happened?</p>
-
-<p>Let&rsquo;s take a look at the <code>vmstat</code> result sampling every 1 second while reproducing this behavior:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="n">procs</span> <span class="o">-----------</span><span class="n">memory</span><span class="o">--------</span><span class="c1">-- ---swap-- -----io---- -system-- ----cpu----</span>
-</span><span class='line'> <span class="n">r</span>  <span class="n">b</span>   <span class="n">swpd</span>   <span class="n">free</span>   <span class="n">buff</span>  <span class="n">cache</span>   <span class="n">si</span>   <span class="n">so</span>    <span class="n">bi</span>    <span class="n">bo</span>   <span class="k">in</span>   <span class="n">cs</span> <span class="n">us</span> <span class="n">sy</span> <span class="n">id</span> <span class="n">wa</span>
-</span><span class='line'> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">27672</span> <span class="mi">325712</span>   <span class="mi">2028</span>  <span class="mi">45212</span>    <span class="mi">0</span>    <span class="mi">0</span>     <span class="mi">0</span>     <span class="mi">0</span>   <span class="mi">24</span>   <span class="mi">30</span>  <span class="mi">1</span>  <span class="mi">1</span> <span class="mi">98</span>  <span class="mi">0</span>
-</span><span class='line'> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">27668</span> <span class="mi">300408</span>   <span class="mi">2028</span>  <span class="mi">45224</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">21408</span>     <span class="mi">0</span>  <span class="mi">373</span>  <span class="mi">719</span> <span class="mi">42</span>  <span class="mi">5</span> <span class="mi">45</span>  <span class="mi">4</span>
-</span><span class='line'> <span class="mi">2</span>  <span class="mi">0</span>  <span class="mi">27664</span> <span class="mi">251552</span>   <span class="mi">2028</span>  <span class="mi">45232</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">41648</span>     <span class="mi">0</span>  <span class="mi">451</span>  <span class="mi">596</span> <span class="mi">79</span> <span class="mi">10</span>  <span class="mi">0</span>  <span class="mi">3</span>
-</span><span class='line'> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">27664</span> <span class="mi">199580</span>   <span class="mi">2028</span>  <span class="mi">45228</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">43040</span>     <span class="mi">0</span>  <span class="mi">349</span>  <span class="mi">432</span> <span class="mi">81</span> <span class="mi">12</span>  <span class="mi">0</span>  <span class="mi">1</span>
-</span><span class='line'> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">27664</span> <span class="mi">130280</span>   <span class="mi">2036</span>  <span class="mi">45220</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">58384</span>    <span class="mi">40</span>  <span class="mi">391</span>  <span class="mi">511</span> <span class="mi">82</span>  <span class="mi">9</span>  <span class="mi">0</span>  <span class="mi">2</span>
-</span><span class='line'> <span class="mi">2</span>  <span class="mi">0</span>  <span class="mi">27664</span>  <span class="mi">86632</span>   <span class="mi">2036</span>  <span class="mi">45228</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">36864</span>     <span class="mi">0</span>  <span class="mi">433</span>  <span class="mi">414</span> <span class="mi">87</span>  <span class="mi">5</span>  <span class="mi">0</span>  <span class="mi">0</span>
-</span><span class='line'> <span class="mi">2</span>  <span class="mi">0</span>  <span class="mi">27664</span>  <span class="mi">44488</span>   <span class="mi">2036</span>  <span class="mi">45224</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">36832</span>     <span class="mi">0</span>  <span class="mi">336</span>  <span class="mi">299</span> <span class="mi">87</span>  <span class="mi">6</span>  <span class="mi">0</span>  <span class="mi">0</span>
-</span><span class='line'> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">27664</span>   <span class="mi">6268</span>   <span class="mi">1356</span>  <span class="mi">32340</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">44112</span>    <span class="mi">44</span>  <span class="mi">362</span>  <span class="mi">438</span> <span class="mi">82</span>  <span class="mi">8</span>  <span class="mi">0</span>  <span class="mi">2</span>
-</span><span class='line'> <span class="mi">2</span>  <span class="mi">1</span>  <span class="mi">27660</span> <span class="mi">437800</span>    <span class="mi">376</span>   <span class="mi">7012</span>   <span class="mi">20</span>  <span class="mi">168</span> <span class="mi">30796</span>   <span class="mi">184</span>  <span class="mi">405</span>  <span class="mi">688</span> <span class="mi">71</span> <span class="mi">19</span>  <span class="mi">0</span>  <span class="mi">1</span>
-</span><span class='line'> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">27660</span> <span class="mi">362444</span>    <span class="mi">924</span>  <span class="mi">20688</span>    <span class="mi">0</span>    <span class="mi">0</span> <span class="mi">22580</span>   <span class="mi">156</span>  <span class="mi">727</span> <span class="mi">1698</span> <span class="mi">10</span> <span class="mi">15</span> <span class="mi">62</span>  <span class="mi">7</span>
-</span><span class='line'> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">27660</span> <span class="mi">361692</span>    <span class="mi">932</span>  <span class="mi">21320</span>    <span class="mi">0</span>    <span class="mi">0</span>   <span class="mi">688</span>     <span class="mi">0</span>   <span class="mi">83</span>  <span class="mi">259</span>  <span class="mi">2</span>  <span class="mi">2</span> <span class="mi">96</span>  <span class="mi">0</span>
-</span><span class='line'> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">27652</span> <span class="mi">346440</span>   <span class="mi">1084</span>  <span class="mi">27352</span>    <span class="mi">4</span>    <span class="mi">0</span> <span class="mi">13516</span>     <span class="mi">0</span>  <span class="mi">650</span> <span class="mi">2576</span> <span class="mi">14</span> <span class="mi">11</span> <span class="mi">65</span> <span class="mi">10</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>The nature of the beasts</h2>
-
-<p>Both mysql and the OS are interesting beasts, if you take a look at the <code>vmstat</code>, mysql will start
-expanding memory usage when it needs to, reaching a point where all the buffer pool is assigned and
-used. Since these indexes do not fit in this buffer pool, all of it gets used.</p>
-
-<p>But the interesting part is that the query execution and expansion does not happen in the buffer
-pool, this memory space is reserved only to load indexes, so that is happening on the other
-21% remaining memory on the server, on the heap. If we take a quick simple look at how this
-query is planned to be executed:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="o">***************************</span> <span class="mi">1</span><span class="p">.</span> <span class="n">row</span> <span class="o">***************************</span>
-</span><span class='line'>           <span class="n">id</span><span class="p">:</span> <span class="mi">1</span>
-</span><span class='line'>  <span class="n">select_type</span><span class="p">:</span> <span class="n">SIMPLE</span>
-</span><span class='line'>           <span class="p">...</span>
-</span><span class='line'>      <span class="n">key_len</span><span class="p">:</span> <span class="mi">32</span>
-</span><span class='line'>          <span class="n">ref</span><span class="p">:</span> <span class="n">const</span>
-</span><span class='line'>         <span class="n">rows</span><span class="p">:</span> <span class="mi">2427075</span>
-</span><span class='line'>     <span class="n">filtered</span><span class="p">:</span> <span class="mi">100</span><span class="p">.</span><span class="mi">00</span>
-</span><span class='line'>        <span class="n">Extra</span><span class="p">:</span> <span class="k">Using</span> <span class="k">where</span><span class="p">;</span> <span class="k">Using</span> <span class="n">temporary</span><span class="p">;</span> <span class="k">Using</span> <span class="n">filesort</span>
-</span><span class='line'><span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span><span class="p">,</span> <span class="mi">1</span> <span class="nf">warning</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>It looks like it will roughly be 70mb of key usage only (key len in bytes, times the row count),
-even though MySQL will use a temporary table, it will only be used for storing the data before
-returning results. The key must be in memory to resolve the query. And the engine will need
-a bit more memory to play around this (sorting for ex).</p>
-
-<h2>So the OS kicks in</h2>
-
-<p>And kills MySQL, since the MySQL query resolution expands beyond available memory, the OS needs
- to find someone to kill to get memory back.</p>
-
-<figure class='code'><figcaption><span>/var/log/syslog</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='text'><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.642150] select 1 (init), adj 0, size 278, to kill
-</span><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.642156] select 371 (rsyslogd), adj 0, size 539, to kill
-</span><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.642162] select 19651 (mysqld), adj 0, size 111249, to kill
-</span><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.642163] send sigkill to 19651 (mysqld), adj 0, size 111249
-</span><span class='line'>Oct 29 06:40:38 localhost kernel: [13063165.698982] type=1400 audit(1414590038.324:30): apparmor=&quot;STATUS&quot; operation=&quot;profile_replace&quot; name=&quot;/usr/sbin/mysqld&quot; pid=19784 comm=&quot;apparmor_parser&quot;
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Taking a look at mysql log, this is all we get there:</p>
-
-<figure class='code'><figcaption><span>/var/log/mysql/error.log</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='text'><span class='line'>InnoDB: The log sequence number in ibdata files does not match
-</span><span class='line'>InnoDB: the log sequence number in the ib_logfiles!
-</span><span class='line'>141029  6:40:38  InnoDB: Database was not shut down normally!
-</span><span class='line'>InnoDB: Starting crash recovery.
-</span><span class='line'>InnoDB: Reading tablespace information from the .ibd files...
-</span><span class='line'>InnoDB: Restoring possible half-written data pages from the doublewrite
-</span><span class='line'>InnoDB: buffer...
-</span><span class='line'>141029  6:40:38  InnoDB: Waiting for the background threads to start
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>MySQL did not see it coming.</p>
-
-<h2>And what if</h2>
-
-<p>We lower the memory for innodb to, say, half the available memory?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='cfg'><span class='line'><span class="na">innodb_buffer_pool_size</span> <span class="o">=</span> <span class="s">268435456</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And then run the query again?</p>
-
-<figure class='code'><figcaption><span>vmstat</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
-</span><span class='line'> r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
-</span><span class='line'> 0  0  27320  48716  75292 222112    0    0     0     0   11   16  0  0 100  0
-</span><span class='line'> 1  0  27320  27512  75292 222192    0    0 17172     0  285  479 19  2 76  2
-</span><span class='line'> 1  0  27320   6260  74568 172164    0    0 63440     4  542 1253 68 22  0  5
-</span><span class='line'> 1  0  27320  76576  74516  46228    0    0 50144     0  380  599 78 14  0  3
-</span><span class='line'> 2  0  27320  36544  74516  46240    0    0 33744     0  341  847 78 14  0  5
-</span><span class='line'> 1  0  27320   6324  63108  44128    0    0 37904     0  362  506 79 14  0  3
-</span><span class='line'> 1  0  27320   6868  55400  43228    0    0 34784     0  330  299 91  4  0  0
-</span><span class='line'> 1  0  27320   6868  55408  43220    0    0 30720    44  335  232 93  1  0  3
-</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 31760     0  330  235 95  2  0  1
-</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 35856     0  348  261 89  4  0  3
-</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 29712     0  330  242 92  1  0  3
-</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 30688     0  335  222 89  5  0  3
-</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 28704     0  330  265 91  1  0  4
-</span><span class='line'> 2  0  27320   6868  55408  43228    0    0 26640     0  329  208 88  6  0  2
-</span><span class='line'> 1  0  27320   6868  55408  43228    0    0 32800     0  341  245 92  2  0  2
-</span><span class='line'> 2  0  27320   6880  55408  43228    0    0 35888     0  353  269 90  3  0  4
-</span><span class='line'> 2  0  27320   6868  55408  43228    0    0 32784     0  340  298 88  4  0  4
-</span><span class='line'> 1  0  27320   6868  55416  43228    0    0 28696    52  349  223 90  3  0  3
-</span><span class='line'> 1  0  27320   6868  55416  43228    0    0 25648     0  334  201 90  3  0  5
-</span><span class='line'> 1  0  27320   6868  55416  43228    0    0 26640     0  325  199 93  2  0  1
-</span><span class='line'> 0  0  27320   6892  55416  43228    0    0  5120     0   62   69 13  0 86  1
-</span></code></pre></td></tr></table></div></figure>
 
 
 
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='mysql'><span class='line'><span class="mi">4</span> <span class="n">rows</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">18</span><span class="p">.</span><span class="mi">39</span> <span class="n">sec</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Heavy usage of IO, but the query survives, and the server keeps running.</p>
-
-<h2>Conclusions</h2>
-
-<p>Both systems are acting like the kind of beasts they are, we only need to
-understand the nature of each to know what to expect.</p>
-
-<p>MySQL is expanding beyond the buffer pool, it is a program like any other
-and will use memory when it is needed, its configurations are to setup the
-maximum set of resources that will be assigned to it in exclusivity, but it
- does not mean that it will not require some more on certain occasions.</p>
-
-<p>The OS will act in self defence, no questions asked, so watch out for that,
-and check your syslog when things get weird.</p>
-]]></content>
-  </entry>
+  <span class="byline author vcard">Authored by <span class="fn">
   
-  <entry>
-    <title type="html"><![CDATA[108 Chars Have to Be Enough for Everybody]]></title>
-    <link href="http://pcarranza.github.io/blog/2014/10/18/108-chars-have-to-be-enough-for-everybody/"/>
-    <updated>2014-10-18T15:10:34-04:00</updated>
-    <id>http://pcarranza.github.io/blog/2014/10/18/108-chars-have-to-be-enough-for-everybody</id>
-    <content type="html"><![CDATA[<p>Look at this code:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;</span> <span class="nb">require</span> <span class="s2">&quot;socket&quot;</span>
-</span><span class='line'>  <span class="o">=&gt;</span> <span class="kp">true</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">socket_file</span> <span class="o">=</span> <span class="s2">&quot;/tmp/1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123&quot;</span>
-</span><span class='line'>  <span class="o">=&gt;</span> <span class="s2">&quot;/tmp/1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123&quot;</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">socket_file</span><span class="o">.</span><span class="n">length</span>
-</span><span class='line'>  <span class="o">=&gt;</span> <span class="mi">108</span>
-</span><span class='line'><span class="no">Socket</span><span class="o">.</span><span class="n">unix_server_socket</span><span class="p">(</span><span class="n">socket_file</span><span class="p">)</span>
-</span><span class='line'>  <span class="o">=&gt;</span> <span class="c1">#&lt;Socket:fd 1&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<!--more-->
-
-
-<p>Now lets add one more char:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;</span> <span class="n">socket_file</span> <span class="o">=</span> <span class="s2">&quot;/tmp/12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234&quot;</span>
-</span><span class='line'>  <span class="o">=&gt;</span> <span class="s2">&quot;/tmp/12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234&quot;</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">socket_file</span><span class="o">.</span><span class="n">length</span>
-</span><span class='line'>  <span class="o">=&gt;</span> <span class="mi">109</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">sock</span> <span class="o">=</span> <span class="no">Socket</span><span class="o">.</span><span class="n">unix_server_socket</span><span class="p">(</span><span class="n">socket_file</span><span class="p">)</span>
-</span><span class='line'>  <span class="ss">ArgumentError</span><span class="p">:</span> <span class="n">too</span> <span class="n">long</span> <span class="n">unix</span> <span class="n">socket</span> <span class="n">path</span> <span class="p">(</span><span class="mi">109</span> <span class="n">bytes</span> <span class="n">given</span> <span class="n">but</span> <span class="mi">108</span> <span class="n">bytes</span> <span class="n">max</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">from</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">rvm</span><span class="o">/</span><span class="n">rubies</span><span class="o">/</span><span class="n">ruby</span><span class="o">-</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">2</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ruby</span><span class="o">/</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">/</span><span class="n">socket</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">817</span><span class="ss">:in</span> <span class="sb">`unix&#39;</span>
-</span><span class='line'><span class="sb">    from /usr/local/rvm/rubies/ruby-2.1.2/lib/ruby/2.1.0/socket.rb:817:in `</span><span class="n">unix_server_socket</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">    from (irb):13</span>
-</span><span class='line'><span class="s1">    from /usr/local/rvm/rubies/ruby-2.1.2/bin/irb:11:in `&lt;main&gt;&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now that is an interesting error, but where does this come from?</p>
-
-<figure class='code'><figcaption><span>http://man7.org/linux/man-pages/man7/unix.7.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#define UNIX_PATH_MAX    108</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">struct</span> <span class="n">sockaddr_un</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kt">sa_family_t</span> <span class="n">sun_family</span><span class="p">;</span>               <span class="cm">/* AF_UNIX */</span>
-</span><span class='line'>    <span class="kt">char</span>        <span class="n">sun_path</span><span class="p">[</span><span class="n">UNIX_PATH_MAX</span><span class="p">];</span>  <span class="cm">/* pathname */</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>So it is an unix <em>feature</em>.</p>
-
-<p>And what about pure unix? Let&rsquo;s check what happens on OSX</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&gt;&gt;</span> <span class="no">Socket</span><span class="o">.</span><span class="n">unix_server_socket</span><span class="p">(</span><span class="n">socket_file</span><span class="p">)</span>
-</span><span class='line'>  <span class="ss">ArgumentError</span><span class="p">:</span> <span class="n">too</span> <span class="n">long</span> <span class="n">unix</span> <span class="n">socket</span> <span class="n">path</span> <span class="p">(</span><span class="mi">109</span> <span class="n">bytes</span> <span class="n">given</span> <span class="n">but</span> <span class="mi">104</span> <span class="n">bytes</span> <span class="n">max</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">from</span> <span class="sr">/Users/me</span><span class="o">/.</span><span class="n">rvm</span><span class="o">/</span><span class="n">rubies</span><span class="o">/</span><span class="n">ruby</span><span class="o">-</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">1</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ruby</span><span class="o">/</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">/</span><span class="n">socket</span><span class="o">.</span><span class="n">rb</span><span class="p">:</span><span class="mi">817</span><span class="ss">:in</span> <span class="sb">`unix&#39;</span>
-</span><span class='line'><span class="sb">    from /Users/me/.rvm/rubies/ruby-2.1.1/lib/ruby/2.1.0/socket.rb:817:in `</span><span class="n">unix_server_socket</span><span class="s1">&#39;</span>
-</span><span class='line'><span class="s1">    from (irb):6</span>
-</span><span class='line'><span class="s1">    from /Users/me/.rvm/rubies/ruby-2.1.1/bin/irb:11:in `&lt;main&gt;&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>It is even shorter. No joy on the pure unix world.</p>
-
-<h2>You may be wondering</h2>
-
-<p>What&rsquo;s the fun in all this? Check this out:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>~<span class="nv">$ SSH_SOCKET</span><span class="o">=</span>/tmp/01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123
-</span><span class='line'>~<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$SSH_SOCKET</span> <span class="p">|</span> awk <span class="s1">&#39;{print length($0)}&#39;</span>
-</span><span class='line'>109
-</span><span class='line'>~<span class="nv">$ </span>ssh -o <span class="nv">ControlMaster</span><span class="o">=</span>yes -o <span class="nv">ControlPath</span><span class="o">=</span><span class="nv">$SSH_SOCKET</span> myremotehost 2&gt; ssh_stderr
-</span><span class='line'>Welcome to MyRemoteBox
-</span><span class='line'>
-</span><span class='line'>  System information as of Fri Oct 17 18:29:43 EDT 2014
-</span><span class='line'>
-</span><span class='line'>  System load:  0.0                Processes:           a_lot
-</span><span class='line'>  Memory usage: relaxed
-</span><span class='line'>
-</span><span class='line'>Last login: some <span class="nb">time </span>not too long ago from my.home.host.ip
-</span><span class='line'><span class="o">[</span>MyRemoteBox<span class="o">]</span>~<span class="nv">$ </span>^D
-</span><span class='line'>
-</span><span class='line'>~<span class="nv">$ </span>cat ssh_stderr
-</span><span class='line'>ControlPath <span class="s2">&quot;/tmp/01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123.bDqhMCS6EbmdeDeN&quot;</span> too long <span class="k">for </span>Unix domain socket
-</span><span class='line'>Connection to my.remote.box.ip closed.
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>ssh</code> will <em>just work</em>, and you will get a connection: your master ssh connection
-will reach the other end. But the socket will not be open, because <strong>the path is too long</strong>.</p>
-
-<p>The worst part is that this failure will just log a message in stderr; that&rsquo;s it, good luck
-to you if you are multiplexing ssh connections through a control path in any automation.
-The main ssh connection will work but the rest will fail with weird messages like
-&ldquo;hostname X not resolved&rdquo; because, in fact, the hostname cannot be resolved since
-your client is not piped into the right network.</p>
-
-<p>And this goes beyond, neither <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh+1">ssh</a>
-nor <a href="http://unixhelp.ed.ac.uk/CGI/man-cgi?ssh_config+5">ssh_config</a> man pages
-say anything about this limitation.</p>
-
-<p>Even checking filesystems limits: there are <a href="http://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits">limits for file names</a>
-(normally 255 bytes); but at least in any modern ext4 of hfs+, which should be quite
-standard now, there is no specific limitation for the path size.</p>
-
-<p>But yeah, a socket file looks like a file, but it is not a file, so general filesystem
-limitations in which the socket file exists do not apply to them. They have their own.</p>
-
-<p>Mind the gap.</p>
-]]></content>
-  </entry>
+    Pablo Carranza
   
-  <entry>
-    <title type="html"><![CDATA[Confident and Readable Code]]></title>
-    <link href="http://pcarranza.github.io/blog/2014/10/12/confident-and-readable-code/"/>
-    <updated>2014-10-12T14:27:15-04:00</updated>
-    <id>http://pcarranza.github.io/blog/2014/10/12/confident-and-readable-code</id>
-    <content type="html"><![CDATA[<p>The interesting thing about learning a new language is not learning the syntax but
-stretching the mind into a new way of thinking. A new point of view which in the long run
-will provide a much wider view and probably a new tool set which can then be ported back
-into whatever you are doing right now.</p>
-
-<!--more-->
+  </span></span>
 
 
-<p>While learning ruby, I ended up reading <a href="http://confidentruby.com">Confident Ruby</a> by
-<a href="http://avdi.org">Avdi Grimm</a></p>
-
-<p>This book introduces the concept of timid code in which <em>&ldquo;the different parts of the method are
-mixed up. Some input is collected, then some error handling, then some more input
-collection, then work is done, and so on.&rdquo;</em></p>
-
-<p>It also explains really well the idea of duck typing and object orientation in general,
-that is, forget about asking for the type of an object (endless visitor patterns, or
-worse: instance of) <strong>are you a duck?</strong>, but rather ask what the object can do: <strong>can you quack?</strong></p>
-
-<p>Awesome, go get it, I learned a lot.</p>
-
-<p>This book is a great follow up for <a href="http://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship">clean code</a>
-which is very Java-ish, and does not port so well to dynamic languages like ruby or python.</p>
-
-<p>In Confident Ruby Avdi explains a lot of different patters that can be used to improve the
-code focusing on the story: a method has to tell a story, and as such, it has to have 4
-main blocks:</p>
-
-<ul>
-<li>collect input</li>
-<li> perform work</li>
-<li>deliver result</li>
-<li>handle failures</li>
-</ul>
+      
 
 
-<p>This is a really interesting structure to keep in mind, how messy is my code and how much
-can I gain from writing my code in such way?</p>
 
-<h2>A bit of self-criticism</h2>
 
-<p>Check this gist:</p>
 
-<div><script src='https://gist.github.com/64f77136549ca7422574.js?file=load_id_rsa.rb'></script>
-<noscript><pre><code>def load_rsa_key(key)
-  case key
-    when nil
-      raise ArgumentError, &quot;Key cannot be nil&quot;
-    when OpenSSL::PKey::PKey
-      key
-    when String, File, IO
-      text = read_file(key)
-      if text =~ /^ssh-rsa/
-        load_ssh_pubkey text
-      else
-        OpenSSL::PKey.read text
-      end
-    end
-end
+      
+      
 
-private 
-
-def load_ssh_pubkey(text)
-  rsakey = OpenSSL::PKey::RSA.new
-  text.lines.each do |line|
-    base64 = line.chomp.split[1]
-    keydata = base64.unpack(&quot;m&quot;).first
-    parts = Array.new
-    while (keydata.length &gt; 0)
-      dlen = keydata[0, 4].bytes.inject(0) do |a, b|
-        (a &lt;&lt; 8) + b
-      end
-      data = keydata[4, dlen]
-      keydata = keydata[(dlen + 4)..-1]
-      parts.push(data)
-    end
-    type = parts[0]
-    raise ArgumentError, &quot;Unsupported key type #{type}&quot; unless type == &quot;ssh-rsa&quot;
-    e = parts[1].bytes.inject do |a, b|
-      (a &lt;&lt; 8) + b
-    end
-    n = parts[2].bytes.inject do |a, b|
-      (a &lt;&lt; 8) + b
-    end
-    rsakey.n = n
-    rsakey.e = e
-  end
-  rsakey
-end
-
-def read_file file
-  f = open_file file, &#39;r&#39;
-  f.read
-end
+<span class="categories">
   
-def open_file file, mode
-  case file
-  when String
-    File.open file, mode
-  when File, IO
-    file
-  else
-    raise ArgumentError, &quot;Invalid file #{file}&quot;
-  end
-end</code></pre></noscript></div>
-
-
-<p>Focus on one function <code>load_ssh_pubkey</code>. It does a non trivial thing
-(at least not for me) which is parsing and building a
-RSA public key from an ssh key.</p>
-
-<p>It works. But the problem here is that it is really hard to follow, the fact that the key
-loading part is using a <em>while there is data to be read</em> does not state with clarity how long
-the reading is going to happen.</p>
-
-<p>There are many <em>byte.injects</em>, one that starts explicitly in 0, the others don&rsquo;t, but why?.
-It is also assuming that more than one line is going to be read from the file/text, but the
-function will return only the last one, which is not clearly stated.</p>
-
-<p>It also checks if the key type is ssh-rsa, which is also checked in the caller
-method, right in the middle of the parsing part, where work is being performed.</p>
-
-<p>And then finally it builds the key to deliver it back.</p>
-
-<p>It is really hard to follow. This code is not telling a story, it is surviving the input
-data, delivering a key as a side effect if it is not killed in the way.</p>
-
-<p>It is not clean code at all.</p>
-
-<h2> Let&rsquo;s try again</h2>
-
-<p>Extracted from the <em>rebuild</em> branch:</p>
-
-<div><script src='https://gist.github.com/a3e8b58418bbe03af518.js?file=ssh_key.rb'></script>
-<noscript><pre><code>class SSHKey
-
-  attr_reader :rsa
-
-  def initialize(args={})
-    source_file = args.fetch(:file) { fail ArgumentError, &quot;Filename is required&quot; }
-    source = if source_file.respond_to?(:read)
-               source_file.read()
-             else
-               File.open(source_file) do |file|
-                 file.read()
-               end
-             end
-    @rsa = load_ssh_rsa_key(source)
-    @rsa ||= OpenSSL::PKey.read(source)
-  end
-
-  private
-
-  def load_ssh_rsa_key(source)
-    fail &quot;DSA is not supported&quot; if source =~ /^ssh-dsa/
-    return nil unless source =~ /^ssh-rsa/
-
-    keydata = decode_key(source)
-
-    skip_key_type_length = parse_data(keydata.slice!(0, 4))
-    keydata.slice!(0, skip_key_type_length)
-
-    rsakey = OpenSSL::PKey::RSA.new
-    exponent_length = parse_data(keydata.slice!(0, 4))
-    rsakey.e = parse_data(keydata.slice!(0, exponent_length))
-
-    modulus_length = parse_data(keydata.slice!(0, 4))
-    rsakey.n = parse_data(keydata.slice!(0, modulus_length))
-
-    @rsa = rsakey
-  end
-
-  def decode_key(source)
-    base64 = source.chomp.split[1]
-    keydata = base64.unpack(&quot;m&quot;).first
-    keydata
-  end
-
-  def parse_data(data)
-    data.bytes.inject(0) do |sum, byte|
-      (sum &lt;&lt; 8) + byte
-    end
-  end
-
-end</code></pre></noscript></div>
-
-
-<p>In this case I&rsquo;m trying to follow Avdi&rsquo;s ideas: readability and telling a story matters.
-Given that I&rsquo;m in the process of turning this <a href="https://github.com/pcarranza/zssl">console tool</a>
-into a gem that I can actually export I prefer creating an object that will know how to
-handle this ssh key loading instead of a function in a module.</p>
-
-<p>Let&rsquo;s check what goes on in the <code>load_ssh_rsa_key</code> method:</p>
-
-<ul>
-<li>It fails if it gets an DSA key because it is not supported.</li>
-<li>The key is decoded in another method.</li>
-<li>There are 3 chunks of data: key type, exponent and modulus.</li>
-<li>The first 4 bytes are the size of the chunk data.</li>
-<li>With that we can build an RSA key, and that is how it is stored in the ssh key file.</li>
-</ul>
-
-
-<p>Much, much better, I can understand what it does in one read, there are no surprises in that code.</p>
-
-<p>Thanks Avdi.</p>
-]]></content>
-  </entry>
+    <a class='category' href='/blog/categories/mysql/'>mysql</a>, <a class='category' href='/blog/categories/performance/'>performance</a>, <a class='category' href='/blog/categories/systems/'>systems</a>
   
-  <entry>
-    <title type="html"><![CDATA[Glue Overhead and Real Processing]]></title>
-    <link href="http://pcarranza.github.io/blog/2014/08/14/glue-overhead-and-real-processing/"/>
-    <updated>2014-08-14T14:38:39-04:00</updated>
-    <id>http://pcarranza.github.io/blog/2014/08/14/glue-overhead-and-real-processing</id>
-    <content type="html"><![CDATA[<p>I was on vacation, little to no connectivity, I just needed to learn something new: I needed to code something.</p>
+</span>
 
-<p>Using my phone I downloaded the source code from <a href="https://github.com/sjl/learnvimscriptthehardway/">learn VimScript the hard way</a>.</p>
 
-<p>It was the book in markdown, but I did not wanted to read markdown, so I hacked a very simple
-<a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-sh">bash script</a>
-to convert this markdown into html using <a href="https://github.com/davidfstr/rdiscount">rdiscount</a>
-which happened to be installed in my laptop.</p>
-
-<p>Executing this script in my laptop took something like 11 seconds&hellip; that is a lot for a 57 files markdown-to-html
-convertion.
-It is way too much. I wrote the same thing <a href="https://gist.github.com/pcarranza/da11a10e03c3ba1641ad#file-convert-rb">using ruby all along</a>.
-This second implementation took less than a second in execution time.</p>
-
-<p>That&rsquo;s it, I got distracted.</p>
-
-<!--more-->
-
-
-<h2>Lets get some data</h2>
-
-<p>First lets use /usr/bin/time to try to understand at a 10km height view what is going on:</p>
-
-<p><code>/usr/bin/time --verbose ../../bash_convert.sh</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>User time (seconds): 4.88
-</span><span class='line'>System time (seconds): 0.56
-</span><span class='line'>Percent of CPU this job got: 97%
-</span><span class='line'>Elapsed (wall clock) time (h:mm:ss or m:ss): 0:05.60
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>/usr/bin/time --verbose ruby1.9.3 ../../convert.rb</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>User time (seconds): 0.09
-</span><span class='line'>System time (seconds): 0.02
-</span><span class='line'>Percent of CPU this job got: 94%
-</span><span class='line'>Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.12
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The time difference is tremendous, lets dive a bit to figure out what is actually going on.</p>
-
-<h2>Profiling with strace</h2>
-
-<p>Strace itself will add a bit of overhead, lets begin running the command with a <code>time</code> up front
-to capture all the input in one file, including the strace overhead.</p>
-
-<p><code>/usr/bin/time --verbose strace -r -f executable 2&gt; bc.strace.out</code>
-will record time while running strace with relative timestamps,
-also recording subprocesses system calls, then write all the
-output in the file bc.strace.out</p>
-
-<p>At the bottom of the output we will find the total time output section:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Command being timed: "strace -r -f ../../bash_convert.sh"
-</span><span class='line'>User time (seconds): 5.97
-</span><span class='line'>System time (seconds): 3.53
-</span><span class='line'>Percent of CPU this job got: 98%
-</span><span class='line'>Elapsed (wall clock) time (h:mm:ss or m:ss): 0:09.69</span></code></pre></td></tr></table></div></figure>
-
-
-<p>It looks like the overhead of catching all the systems calls with strace is
-around 2 more seconds.</p>
-
-<p>Strace output looks like this:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> 0.000000 open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000147 open("/lib/x86_64-linux-gnu/libtinfo.so.5", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000175 open("/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000171 open("/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000565 open("/dev/tty", O_RDWR|O_NONBLOCK) = 3
-</span><span class='line'> 0.000147 open("/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000299 open("/proc/meminfo", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'> 0.000485 open("/usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache", O_RDONLY) = 3
-</span><span class='line'> 0.000653 open("../../bc.sh", O_RDONLY) = 3
-</span><span class='line'>Process 16661 attached
-</span><span class='line'>[pid 16661]      0.002270 open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000105 open("/lib/x86_64-linux-gnu/libselinux.so.1", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000233 open("/lib/x86_64-linux-gnu/librt.so.1", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000175 open("/lib/x86_64-linux-gnu/libacl.so.1", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000183 open("/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000176 open("/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000159 open("/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000200 open("/lib/x86_64-linux-gnu/libattr.so.1", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16661]      0.000762 open("/proc/filesystems", O_RDONLY) = 3
-</span><span class='line'>[pid 16661]      0.000219 open("/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3
-</span><span class='line'>[pid 16660]      0.002030 wait4(-1, Process 16660 suspended
-</span><span class='line'>Process 16660 resumed
-</span><span class='line'>Process 16661 detached
-</span><span class='line'>[{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 16661
-</span><span class='line'> 0.000224 --- SIGCHLD (Child exited) @ 0 (0) ---
-</span><span class='line'> 0.000036 wait4(-1, 0x7fffc1760f18, WNOHANG, NULL) = -1 ECHILD (No child processes)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And it goes on and on and on.</p>
-
-<h2>Pre-processing strace output</h2>
-
-<p>Looking at the trace file we will need to do some processing to split the main process
-from the subprocesses data, as the main process is the bash script execution and the
-subprocesses are ruby interpreter executions.</p>
-
-<p>This is what I did to split those two data sets:</p>
-
-<p>All that starts with spaces and then a time measurement belongs to the main process.
-But all that starts with <code>[pid xxxx]</code> belongs to a subprocess.</p>
-
-<p>So, lets split output into main-process and sub-processes:</p>
-
-<p><code>grep -e '^ \+[0-9\.]\+ ' bc.strace.out | sed -e 's/^ *//g' &gt; bc.st.mp.out</code></p>
-
-<p><code>grep -e '^\[pid [0-9]\+\]' bc.strace.out | sed -e 's/^\[pid [0-9]\+\] *//g' &gt; bc.st.sp.out</code></p>
-
-<h3>And now some questions with the data</h3>
-
-<p>First, we will need some regex processing, so define this function to make your life easier:</p>
-
-<p><code>function regex { gawk 'match($0,/'$1'/, ary) {print ary['${2:-'0'}']}'; }</code></p>
-
-<p>And then:</p>
-
-<ul>
-<li>How much time do the main process takes to execute?</li>
-</ul>
-
-
-<p><code>cat bc.st.mp.out | gawk '{ sum += $1 } END { print sum }'</code>: 0.116901 seconds</p>
-
-<ul>
-<li>How much time do all the subprocesses take to execute?</li>
-</ul>
-
-
-<p><code>cat bc.st.sp.out | gawk '{ sum += $1 } END { print sum }'</code>: 9.57473 seconds</p>
-
-<ul>
-<li>In the main process, how much time do each system call take?</li>
-</ul>
-
-
-<p><code>for syscall in $(cat bc.st.mp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq); do t=$(grep -e "$syscall" bc.st.mp.out | awk '{ sum += $1 } END { printf("%.6f", sum) }') ; echo $t $syscall; done | sort -gr</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>0.052399 wait4
-</span><span class='line'>0.028265 rt_sigprocmask
-</span><span class='line'>0.009249 write
-</span><span class='line'>0.007297 brk
-</span><span class='line'>0.002603 rt_sigaction
-</span><span class='line'>0.002481 stat
-</span><span class='line'>0.002456 clone
-</span><span class='line'>0.001792 rt_sigreturn
-</span><span class='line'>0.001109 mmap
-</span><span class='line'>0.000966 read
-</span><span class='line'>0.000877 open
-</span><span class='line'>0.000798 mprotect
-</span><span class='line'>0.000737 close
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>But how many times each of these system calls are being called on the main process?</li>
-</ul>
-
-
-<p><code>cat bc.st.mp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq -c | sort -gr</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>244 rt_sigprocmask
-</span><span class='line'>114 write
-</span><span class='line'>67 rt_sigaction
-</span><span class='line'>59 wait4
-</span><span class='line'>58 rt_sigreturn
-</span><span class='line'>58 clone
-</span><span class='line'>16 brk
-</span><span class='line'>15 mmap
-</span><span class='line'>13 read
-</span><span class='line'>10 stat
-</span><span class='line'>10 close
-</span><span class='line'>9 open
-</span><span class='line'>...</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>How much time does each system call takes in the subprocesses?</li>
-</ul>
-
-
-<p><code>for syscall in $(cat bc.st.sp.out | regex ' ([a-z0-9_]*)' 1 | sort | uniq); do t=$(grep -e "$syscall" bc.st.sp.out | awk '{ sum += $1 } END { printf("%.6f", sum) }') ; echo $t $syscall; done | sort -gr</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>5.164169 stat
-</span><span class='line'>1.204976 open
-</span><span class='line'>1.160715 read
-</span><span class='line'>0.798758 fstat
-</span><span class='line'>0.489750 brk
-</span><span class='line'>0.295447 close
-</span><span class='line'>0.256523 ioctl
-</span><span class='line'>0.251957 lstat
-</span><span class='line'>0.187970 lseek
-</span><span class='line'>0.108561 exit_group
-</span><span class='line'>0.102944 mmap
-</span><span class='line'>0.085621 mprotect
-</span><span class='line'>0.071114 rt_sigaction
-</span><span class='line'>0.061000 getrlimit
-</span><span class='line'>0.060410 rt_sigprocmask
-</span><span class='line'>0.046956 write</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>And how many times is each one called?</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>19790 fstat
-</span><span class='line'>15174 stat
-</span><span class='line'>14602 open
-</span><span class='line'>13177 read
-</span><span class='line'>7940 close
-</span><span class='line'>5930 ioctl
-</span><span class='line'>5244 lstat
-</span><span class='line'>5016 lseek
-</span><span class='line'>2534 mmap
-</span><span class='line'>2149 brk
-</span><span class='line'>1555 mprotect
-</span><span class='line'>1325 rt_sigaction
-</span><span class='line'>...
-</span><span class='line'>115 write
-</span><span class='line'>...
-</span><span class='line'>57 wait4</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Conclusions</h3>
-
-<h2>The main process waits, subprocesses open and read files</h2>
-
-<p>This is what strace shows, the main process spends about half of its execution time waiting on subprocesses.</p>
-
-<p>The subprocesses spend most of the time checking for file status (stat and fstat, which are being
-accounted as user time) and then opening and reading files. Which basically is waiting too.</p>
-
-<p>Taking a look at what files are being open by the subprocesses</p>
-
-<p><code>grep open bc.st.sp.out | sed -e 's/^[0-9\.]\+ //' | sort | uniq -c | sort -gr</code></p>
-
-<p>We find that the ruby environment (about 140 files in this particular case), is being loaded at least 57 times,
-one time per file to convert. This loading is roughly 0.1461 seconds per environment the main process needs to load.
-And a simple multiplication (0.1461 * 57 = 8.3277) explains where the time actually goes: in the glue, loading
-one full environment for each file to convert.</p>
-
-<p>For me, this answers one of those questions that is always bouncing in my head: how heavy is heavy when we
-talk about interpreted languages like ruby or python.</p>
-
-<p>Loading a full ruby environment is something really heavy and should be taken into consideration if we ever need
-to do a repetitive task. Going back to the beginning processing all the files in one only environment takes less
-than the average time it is needed to load it 57 times.</p>
-
-<p>This said, I will keep using bash for quick dirty hacks or stream processing like I&rsquo;ve done in this very post,
-glueing cat, grep, sed and awk to parse the data. But if I ever need to automate a task that will be executed
-many times a day this glue overhead may be too much.</p>
-
-<p><code>strace</code> <strong>rocks</strong> big time.</p>
-]]></content>
-  </entry>
+    </p>
+    
+      <div class="sharing">
   
-  <entry>
-    <title type="html"><![CDATA[Rhythmweb, the Setup]]></title>
-    <link href="http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup/"/>
-    <updated>2014-07-27T12:57:19-04:00</updated>
-    <id>http://pcarranza.github.io/blog/2014/07/27/rhythmweb-the-setup</id>
-    <content type="html"><![CDATA[<!--more-->
-
-
-<ul>
-<li>An <a href="http://blog.codinghorror.com/revisiting-the-home-theater-pc/">HTPC</a> with <a href="https://wiki.gnome.org/Apps/Rhythmbox">RhythmBox</a> installed in it</li>
-<li>An <a href="http://www.whathifi.com/yamaha/s500/review">AMP</a> with a pair of <a href="http://www.whathifi.com/monitor-audio/bronze-bx2/review">speakers</a>,</li>
-<li>A <a href="http://hifimediy.com/index.php?route=product/product&amp;product_id=83">DAC</a></li>
-<li>A mobile phone with a browser.</li>
-<li>A pulse audio specific configuration to duplicate the output, analog and DAC (adding HDMI is a small tweak):</li>
-</ul>
-
-
-<figure class='code'><figcaption><span>/etc/pulse/default.pa</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ini'><span class='line'><span class="na">load-module module-combine-sink sink_name</span><span class="o">=</span><span class="s">combined slaves=alsa_output.pci-0000_00_1b.0.analog-stereo,alsa_output.usb-HiFimeDIY_Audio_SA9023_USB_Audio-01-Audio.analog-stereo</span>
-</span><span class='line'><span class="err">set-default-sink</span> <span class="err">combined</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Total spent budget, assuming you already have the HTPC and the mobile phone: 756€</p>
-
-<p>Then you can pick what your player is going to play using your mobile phone, without reaching a keyboard, a mouse or a screen.</p>
-
-<p>You can skip the DAC if you don&rsquo;t care that much about sound, but if don&rsquo;t care too much about sound, you can skip the whole project.</p>
-
-<p>Originally this was built on top of a Mac Mini G4 without the DAC, but time passes and improvements arrive.</p>
-
-<p>Enjoy</p>
-]]></content>
-  </entry>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://pcarranza.github.io/blog/2014/12/29/understanding-mysql-degradation/" data-via="pbl0c" data-counturl="http://pcarranza.github.io/blog/2014/12/29/understanding-mysql-degradation/" >Tweet</a>
   
-  <entry>
-    <title type="html"><![CDATA[About Refactoring and Code Coverage]]></title>
-    <link href="http://pcarranza.github.io/blog/2014/06/21/about-code-coverage/"/>
-    <updated>2014-06-21T21:19:00-04:00</updated>
-    <id>http://pcarranza.github.io/blog/2014/06/21/about-code-coverage</id>
-    <content type="html"><![CDATA[<p>On the <a href="http://pcarranza.github.io/2014/05/resuscitating-rhythmweb.html">previous post</a> I was talking about <a href="https://github.com/pcarranza/rhythmweb">legacy code</a>, considering legacy code as any code that has no tests.</p>
-
-<p>As an excercise I was going to recover this project first by adding some testing layer and then refactoring.</p>
-
-<!--more-->
-
-
-<p>In this process I really learned a lot, first about the mindset change that using a completely different language such as Java or Python is: one thing is to write some code in python with a Java style (as it was before) and another completely different thing is understanding how to code in a given language, the idiom, style and patterns that apply to one language does not necessary apply to other.</p>
-
-<p>Second: my code sucks, really; reviewing your own code a few years later is a great humble process, this gives you a lot of perspective at how much you sucked then, and make you wonder how much you will suck now to your future self.</p>
-
-<p>And third: it is really hard to measure quality in any objective and reliable way, some people will talk about code coverage as the ultimate quality index, well, it is not; yes it is useful, but you cannot rely on coverage as the only quality measure. More important than that is common sense and making the right design decisions.</p>
-
-<h2> Testing, mocking and code coverage</h2>
-
-<p>Mocking is actually lying, but in this particular case it is directly impossible to use the real objects that handle Rhythmbox because those are not accessible without a Rhythmbox instance; and it is not easy to automatically launch a Rhythmbox instance and then run tests from there; this can be considered as a project in itself. In fact that would be system testing, and in this case I&rsquo;m going as far as unit testing with some manual system testing using curl.</p>
-
-<p>On the good part, code coverage will give you the visibility to understand what you are actually testing, and what is in a reliable enough status, and with that you can refactor code, removing code that is actually impossible to test applying late <a href="http://en.wikipedia.org/wiki/You_aren't_gonna_need_it">YAGNI</a> and cleaning up the code to make is subjectively better, which is the most I can expect.</p>
-
-<p>The way I faced starting to cover the code was to create a conceptual business layer that did not existed in the code and then starting to cover only this layer while asserting that the mocks were called with the right arguments. I also used some stubs to avoid the &lsquo;mock reply to all&rsquo; pattern as it hides bugs that you will only find when running the code for real.</p>
-
-<p>This alowed me to focus on that conceptual business logic layer and start pushing complexity up and down leaving only what I considered to be application business logic. After that responsibilities started to be more clear, and with this iterative process, pieces started to fall into it&rsquo;s natural place one by one.</p>
-
-<h2>The refactoring log</h2>
-
-<ul>
-<li>With initial coverage, I refactored configuration and logging just for simplification, it helped later.</li>
-<li>Some dead code was removed, including the <a href="https://github.com/pcarranza/rhythmweb/commit/8439ac0fb3b15b3810e9740697fdd959dd06afba">templating engine</a> that was actually not in use, but that was not visible due to excesive complexity. And I was honestly afraid of removing anything without proper testing.</li>
-<li>When I reached <a href="https://coveralls.io/builds/801583">some good coverage</a> of the rest layer I replaced the <a href="https://github.com/pcarranza/rhythmweb/commit/9c0e2f2406476df5632bfecff4e1aae4e156a4af">json parsing and writing implementation</a> that was there from the G4 times with the current python json implementation, less is more.</li>
-<li>Around this point I realized that it was quite easy to <a href="https://github.com/pcarranza/rhythmweb/commit/62c2e1d022e727f6e77b2578ce15e0868d93a16f">introduce bugs using mocks</a> so I added an <a href="https://github.com/pcarranza/rhythmweb/commit/2ab2e2bd19b840ae79149f9d35f18118ddb3bd13">acceptance test that I can run from a terminal</a>.</li>
-<li>The I started pushing complexity out of the rest layer into a controller layer: <a href="https://github.com/pcarranza/rhythmweb/commit/c6b685b1c47a953a5d30d5d3f03ef317679e4f9e">song</a>, <a href="https://github.com/pcarranza/rhythmweb/commit/06361f9a1f96270d595a48550c0eafb64ebfff51">queue</a>, <a href="https://github.com/pcarranza/rhythmweb/commit/12858f5ce871e66c79bf628cc85e64880522276d">player</a> and finally <a href="https://github.com/pcarranza/rhythmweb/commit/ec80ccc5d07b29998f4913fe710559481e6558e7">query</a>.</li>
-<li>With that covered, I <a href="https://github.com/pcarranza/rhythmweb/commit/6e06a554c620da357588788deb78dad7cfbf6788">removed the rhythmbox handler argument that was being passed around</a> and added that as a module value. I was growing on confidence, so I started to do major changes.</li>
-<li>So I started to go down, and started to add coverage for the rhythmbox handler object, with the goal of <a href="https://github.com/pcarranza/rhythmweb/commit/1b442a578841edb6a7f6a5355d116fc4ab5d1dda">removing the multiple inheritance</a> and collapse all the code in one object so it can then be simplified and then splitted again.</li>
-<li>Then refactored too fast without having proper coverage to finally discover a <a href="https://github.com/pcarranza/rhythmweb/commit/b8cfbcf5253ac5a8d18c179cd3ab6fa237aafe7c">bug that exploded in my face</a></li>
-<li>Worked hard on getting real coverage on the rbhandler object, one responisiblity at a time, to finally get the query part refactored, and <a href="https://github.com/pcarranza/rhythmweb/commit/9fc1116209b129542387b177f048e7ef99e08551">looks way much better</a>.</li>
-<li>Finally, just to make sure that things keep running I added some full stack integration testing, basically it launches the server with all the stack and <a href="https://github.com/pcarranza/rhythmweb/commit/7cdc9e60e63ec7ad5df982ed60f3dcf034b8f1c5">gets a page</a>, some <a href="https://github.com/pcarranza/rhythmweb/commit/2929512aee8c1d65d0103c7dc64756c821a04323">page not found error and 500 server error tests</a>, and then <a href="https://github.com/pcarranza/rhythmweb/commit/b34b09bf9bcefb82421940316a157e8c8fc9eeec">posting data test</a>.</li>
-</ul>
-
-
-<p>While doing this I changed some things on the server implementation (simplification) and I&rsquo;m in my way to change all the routing implementation, I can do it because I can test with a full stack integration test that it will keep working.</p>
-
-<h2>The coverage percentage as quality measurement</h2>
-
-<p>The funny thing I found out is that while refactoring I tend to write less code, if this code was covered I will actually reduce the covered absolute number of lines, and also the total number of lines will be reduced. But the funny thing is that in the coveralls metric my refactored code (with better style) as a lower punctuation.</p>
-
-<p>The case of the <a href="https://coveralls.io/builds/870038">rhythmbox handler simplification lost 1.21% of code coverage</a>, and it was just better to have it all on plain sight than spread across multiple objects that where inherithed into the same. But the simple fact that some class definition code was not being imported anymore this hitted the code coverage, producing this &lsquo;bad result&rsquo; lowering the score.</p>
-
-<p>And even worse, the <a href="https://coveralls.io/builds/884174">query refactoring</a> that produced a code that has way better style (<a href="http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)">SOLID wise</a>) also suffered of a 0.1% coverage drop because it simply was less code.</p>
-
-<h2>Final thoughts</h2>
-
-<p>Is code coverage a bad thing? or unnecessary? not at all.</p>
-
-<p>In this particular case, code coverage was a very usefull tool that allowed me to understand where to go next, starting with a thin layer of testing and then moving up and down from there, watching what was touched with each new test and refactoring these pieces of code to a better shape slowly.</p>
-
-<p>In the land of the blind, the one-eye man is king; and code coverage is an eye into your code.</p>
-
-<p>But don&rsquo;t take the percentage of code covered as an indicator of quality, it is just an indicator of visibility.</p>
-
-<p>A lot of the code that is still in the project sucks and must be refactored, I&rsquo;m still working on it.</p>
-]]></content>
-  </entry>
   
-  <entry>
-    <title type="html"><![CDATA[Resuscitating Rhythmweb]]></title>
-    <link href="http://pcarranza.github.io/blog/2014/05/23/resuscitating-rhythmweb/"/>
-    <updated>2014-05-23T18:50:00-04:00</updated>
-    <id>http://pcarranza.github.io/blog/2014/05/23/resuscitating-rhythmweb</id>
-    <content type="html"><![CDATA[<p>There was an old project, it started based on an ancient ppc ubuntu that was running on top of a mac mini G4, built for python 2.4 in an environment that did not accepted installing any dependency.</p>
-
-<p>Back in the day I did not knew what a unit test was, so I built it the old way: code a little, try it, code a little more, make it work again, etc, etc.
-You can tell if you see the old code, it is full with logging messages to check if the execution reach a certain portion of the code, oh yeah, no debugging was possible.</p>
-
-<p>In the middle of the road, rhythmbox evolved, with <a href="http://www.gnome.org/gnome-3/">gnome-shell</a> rhythmbox adapted to <a href="http://www.gtk.org/">GTK3</a>, breaking a lot of things.
-And finally it also changed from python2 to python3, breaking the rest of things.</p>
-
-<p>There is a lot of work to do to bring it back.</p>
-
-<p>The way I use it is by turning my mobile phone into a remote control for my music player: <a href="https://wiki.gnome.org/Apps/Rhythmbox">rhythmbox</a>,
- that way I can select what I want to hear without turning on the screen on my HTPC or reaching a keyboard, both things I&rsquo;m not usually able to, and also I am lazy.</p>
-
-<!--more-->
-
-
-<h2> The initial project status</h2>
-
-<p><a href="http://en.wikipedia.org/wiki/Abandonware">Abandonware</a> is probably the word that fits better.
-Shame on me, as I ignored the project for a long time, mainly because I did not needed it.
-But I do need it back, or maybe it is just that I have some time to dedicate to it, plus I feel embarrassed by that code:
-never underestimate the power of public shame.</p>
-
-<p>Lets face it, I did not wanted to change a thing, it was still kinda running on rhythmbox on gtk3, python2.7,
-which was what I had in my old debian based rhythmbox on the TV box: I did not needed to code anything to use it&hellip;</p>
-
-<h2>The public shame</h2>
-
-<p>I missed it, and progress is progress, and also there is the shame. I needed to do something about it; so, I brought it into my
-<a href="https://github.com/pcarranza/rhythmweb">github</a> account, setup the project on <a href="https://travis-ci.org/pcarranza/rhythmweb">travis-ci</a>
-and the most important, add the <a href="https://coveralls.io/r/pcarranza/rhythmweb">badge with the coverage percentage</a>,
-so the shame becomes public.
-Then I added a roadmap to the readme, which in this case works as a wish list, all the things I want to happen to the project.</p>
-
-<h2>How to work with legacy code?</h2>
-
-<p><em>Legacy code</em> is any code that is in production, not covered by a test. With that definition, you can write legacy code right away, you only need to code,
-and not code tests.</p>
-
-<p>Initially this project had a coverage of a flawless <strong>0</strong>, so it was all legacy code.</p>
-
-<p>There is a lot of refactor to do, but it is not possible to refactor without tests,
-that is like skydiving with a backpack, any backpack, maybe you get lucky and it is a parachute, probably not.</p>
-
-<p>This is where I am right now, writing tests.</p>
-
-<p>This can be tricky, you can spend all your time chasing a 100% coverage number without adding any value to the code, I did that already and I know that nothing good comes out of it, so lets setup a ground rules:</p>
-
-<ul>
-<li>Coverage is a tool, not a goal: it&rsquo;s not about the 100% number, I have to agree with @dhh; coverage is not a magical metric that will make the code perfect, it is just a tool that will let you know what is being tested and what not, it&rsquo;s a matter of common sense to determine if it is good enough to stop or not.</li>
-<li>No refactor until basic usage is covered: this is a basic, to avoid introducing new bugs on a code base that is bad enough already.</li>
-<li>No mocking or patching beyond isolating rhythmbox logic or WSGI logic: again, heavy mocking or monkey patching would hide bugs inside the mocks, so lets try to use actual objects whenever possible and keep mocks under control.</li>
-<li>All changes will be made while using the tool (eat your own dogfood)</li>
-<li>Use travis and coveralls: for gamification</li>
-<li>Declare what is the direction of the project up from in the roadmap to keep focus</li>
-</ul>
-
-
-<p>With all that, I&rsquo;ll resuscitate this project. Stay online for updates.</p>
-]]></content>
-  </entry>
   
-</feed>
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/10/30/about-beasts-in-the-wild/" title="Previous Post: About beasts in the wild">&laquo; About beasts in the wild</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Pablo Carranza -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'pcarranza';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pcarranza.github.io/blog/2014/12/29/understanding-mysql-degradation/';
+        var disqus_url = 'http://pcarranza.github.io/blog/2014/12/29/understanding-mysql-degradation/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
