@@ -4,7 +4,7 @@
   <title><![CDATA[Pablo C]]></title>
   <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2015-02-09T04:30:03-05:00</updated>
+  <updated>2015-02-09T04:31:31-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -1212,7 +1212,7 @@ solution, it is just delaying the problem.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[About Beasts in the Wild]]></title>
+    <title type="html"><![CDATA[About Beasts in the Wild or How to Kill MySQL With a Query]]></title>
     <link href="http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild/"/>
     <updated>2014-10-30T16:34:58-04:00</updated>
     <id>http://pcarranza.github.io/blog/2014/10/30/about-beasts-in-the-wild</id>
