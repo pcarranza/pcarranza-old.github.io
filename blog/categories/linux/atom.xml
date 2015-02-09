@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Linux | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/linux/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2015-02-09T04:31:31-05:00</updated>
+  <updated>2015-02-09T04:45:29-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -52,7 +52,7 @@ query_cache_type = 0
 innodb process. There are some other details in this configuration, but they are not
 relevant for this particular test.
 Innodb is going to use this memory basically for loading indexes into
-that memory, and stuff like that.</p>
+that memory.</p>
 
 <p>So what would happen if I run a nasty query?</p>
 
@@ -143,7 +143,7 @@ Oct 29 06:40:38 localhost kernel: [13063165.642163] send sigkill to 19651 (mysql
 Oct 29 06:40:38 localhost kernel: [13063165.698982] type=1400 audit(1414590038.324:30): apparmor="STATUS" operation="profile_replace" name="/usr/sbin/mysqld" pid=19784 comm="apparmor_parser"
 </code></p>
 
-<p>Taking a look at mysql log, this is all we get there:</p>
+<p>Taking a look at mysql log, this is all we get:</p>
 
 <p><code>text /var/log/mysql/error.log
 InnoDB: The log sequence number in ibdata files does not match
@@ -212,6 +212,12 @@ maximum set of resources that will be assigned to it in exclusivity, but it
 
 <p>The OS will act in self defence, no questions asked, so watch out for that,
 and check your syslog when things get weird.</p>
+
+<h2>A final note</h2>
+
+<p>The os where this query is running with a <code>swappiness</code> of 0, with a higher value
+the database heap would have been swapped out, but you don&rsquo;t want your database
+memory being managed by the OS, trust me on this one.</p>
 ]]></content>
   </entry>
   

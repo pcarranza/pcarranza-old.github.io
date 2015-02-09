@@ -4,7 +4,7 @@
   <title><![CDATA[Pablo C]]></title>
   <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2015-02-09T04:31:31-05:00</updated>
+  <updated>2015-02-09T04:45:29-05:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -1255,7 +1255,7 @@ so there is little room for failure.</p>
 innodb process. There are some other details in this configuration, but they are not
 relevant for this particular test.
 Innodb is going to use this memory basically for loading indexes into
-that memory, and stuff like that.</p>
+that memory.</p>
 
 <p>So what would happen if I run a nasty query?</p>
 
@@ -1378,7 +1378,7 @@ a bit more memory to play around this (sorting for ex).</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Taking a look at mysql log, this is all we get there:</p>
+<p>Taking a look at mysql log, this is all we get:</p>
 
 <figure class='code'><figcaption><span>/var/log/mysql/error.log</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1482,6 +1482,12 @@ maximum set of resources that will be assigned to it in exclusivity, but it
 
 <p>The OS will act in self defence, no questions asked, so watch out for that,
 and check your syslog when things get weird.</p>
+
+<h2>A final note</h2>
+
+<p>The os where this query is running with a <code>swappiness</code> of 0, with a higher value
+the database heap would have been swapped out, but you don&rsquo;t want your database
+memory being managed by the OS, trust me on this one.</p>
 ]]></content>
   </entry>
   
