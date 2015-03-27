@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Systems | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/systems/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2015-02-09T04:45:29-05:00</updated>
+  <updated>2015-03-27T15:51:57-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -38,8 +38,7 @@ being slow. Initially from our developer point of view we thought that the issue
 was as simple as a network problem. But a bit later, another user complained
 about the same thing, and then another, so we started paying attention.</p>
 
-<p>We did not had enough metrics, and most importantly, we did not <a href="http://blog.sriramnarayan.com/2011/04/dashboards-promote-ignorance.html">had the right
-metrics</a>.</p>
+<p>We did not had enough metrics, and most importantly, we did not <a href="http://blog.sriramnarayan.com/2011/04/dashboards-promote-ignorance.html">had the right metrics</a>.</p>
 
 <p>Our <em>way too broad</em> green dashboard was not showing anything in particular,
 regular load for a busy server, nothing that would trigger an alarm; later
