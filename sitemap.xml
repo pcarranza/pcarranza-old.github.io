@@ -3,6 +3,12 @@
   
   
   <url>
+    <loc>http://pcarranza.github.io/blog/2015/05/03/using-exceptions-for-flow-control/</loc>
+    <lastmod>2015-05-03T18:16:02-04:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://pcarranza.github.io/blog/2014/12/29/understanding-mysql-degradation/</loc>
     <lastmod>2014-12-29T13:45:17-05:00</lastmod>
     <priority>0.8</priority>
@@ -53,14 +59,14 @@
   
   <url>
     <loc>http://pcarranza.github.io/blog/archives/</loc>
-    <lastmod>2015-03-27T15:51:57-04:00</lastmod>
+    <lastmod>2015-05-03T19:20:16-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://pcarranza.github.io/</loc>
-    <lastmod>2015-03-27T15:51:57-04:00</lastmod>
+    <lastmod>2015-05-03T19:20:16-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>

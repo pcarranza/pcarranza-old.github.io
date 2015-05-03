@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Using Exceptions for Flow Control - Pablo C</title>
+  <meta name="author" content="Pablo Carranza">
+
+  
+  <meta name="description" content="While reading Avdi Grimm&rsquo;s Exceptional Ruby he mentions: Are Ruby Exceptions slow?1
+2
+Raising an exception is typically an expensive operation &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pcarranza.github.io/blog/2015/05/03/using-exceptions-for-flow-control">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Pablo C" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='//fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='//fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-55532910-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Pablo C</a></h1>
+  
+    <h2>Seriously curious</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscription">
+  <li><a href="https://github.com/pcarranza" rel="subscribe-github" title="@pcarranza on GitHub">GitHub</a></li>
+</ul>
+  
+  
+  
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Using Exceptions for Flow Control</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-03T18:16:02-04:00" pubdate data-updated="true">2015-05-03</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>While reading Avdi Grimm&rsquo;s <strong>Exceptional Ruby</strong> he mentions:</p>
+
+<figure class='code'><figcaption><span>Are Ruby Exceptions slow?</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>Raising an exception is typically an expensive operation in any language,
+</span><span class='line'>and Ruby is no, um, exception
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Well, Python probably is no, um, exception neither.</p>
+
+<p>A few weeks ago I was discussing about using exceptions for flow control myself
+with my team. Probably influenced by <strong>Confident Ruby</strong> from the same author I
+only like to see exception handling on the bottom edge of a method, not in the
+middle.</p>
+
+<!--more-->
+
+
+<p>If I find an exception being catched in the middle of a method while performing a
+code review I will request the code writer to extract that exception handling to
+another method and to name it in a way that is showing a clear intent.</p>
+
+<p>I think that exceptions are for exceptional situations, and should not be used
+for handling the regular flow of the code. In fact, the less you catch exceptions,
+the better. Because catching those is expensive enough, both for the cognitive
+understanding of the reader, who is dragged out from the regular narrative of the
+method, and for the system itself.</p>
+
+<p>But this assertion from Avdi sparked my curiosity.</p>
+
+<h3>How slow is slow?</h3>
+
+<p>You could never tell without measurements, my gut feeling is that using exceptions
+should involve a whole subsystem, but I have no idea how bad that should be.</p>
+
+<p>So let&rsquo;s play, let&rsquo;s write some equivalent code and measure which one is slower, and
+let&rsquo;s try to figure out why.</p>
+
+<h3> The experiment</h3>
+
+<p>Just some python code</p>
+
+<figure class='code'><figcaption><span>using_exceptions_for_control_flow.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c">#!/usr/bin/env python</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">sys</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">dedent</span>
+</span><span class='line'><span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">timeit</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">measure_all_the_things</span><span class="p">():</span>
+</span><span class='line'>    <span class="n">use_cases</span> <span class="o">=</span> <span class="n">create_use_cases</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">measurements</span> <span class="o">=</span> <span class="n">measure_execution_times</span><span class="p">(</span><span class="n">use_cases</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">print_measurements</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">create_use_cases</span><span class="p">():</span>
+</span><span class='line'>    <span class="n">use_cases</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span class='line'>    <span class="n">use_cases</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;using exceptions&#39;</span><span class="p">,</span> <span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span class='line'><span class="s">            d = {}</span>
+</span><span class='line'><span class="s">            try:</span>
+</span><span class='line'><span class="s">                v = d[&#39;key&#39;]</span>
+</span><span class='line'><span class="s">            except KeyError:</span>
+</span><span class='line'><span class="s">                v = &#39;default value&#39;</span>
+</span><span class='line'><span class="s">            &quot;&quot;&quot;</span><span class="p">)))</span>
+</span><span class='line'>    <span class="n">use_cases</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;using default value&#39;</span><span class="p">,</span> <span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span class='line'><span class="s">            d = {}</span>
+</span><span class='line'><span class="s">            v= d.get(&#39;key&#39;, &#39;default value&#39;)</span>
+</span><span class='line'><span class="s">            &quot;&quot;&quot;</span><span class="p">)))</span>
+</span><span class='line'>    <span class="n">use_cases</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;handling none manually&#39;</span><span class="p">,</span> <span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span class='line'><span class="s">            d = {}</span>
+</span><span class='line'><span class="s">            value = d.get(&#39;key&#39;)</span>
+</span><span class='line'><span class="s">            if not value:</span>
+</span><span class='line'><span class="s">                value = &#39;default value&#39;</span>
+</span><span class='line'><span class="s">            &quot;&quot;&quot;</span><span class="p">)))</span>
+</span><span class='line'>    <span class="n">use_cases</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;checking keys&#39;</span><span class="p">,</span> <span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span class='line'><span class="s">            d = {}</span>
+</span><span class='line'><span class="s">            if &#39;key&#39; in d.keys():</span>
+</span><span class='line'><span class="s">                value = d[&#39;key&#39;]</span>
+</span><span class='line'><span class="s">            else:</span>
+</span><span class='line'><span class="s">                value = &#39;default value&#39;</span>
+</span><span class='line'><span class="s">            &quot;&quot;&quot;</span><span class="p">)))</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">use_cases</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">measure_execution_times</span><span class="p">(</span><span class="n">use_cases</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Measuring times&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">use_cases</span><span class="p">:</span>
+</span><span class='line'>        <span class="n">use_case</span><span class="p">,</span> <span class="n">code</span> <span class="o">=</span> <span class="n">test</span>
+</span><span class='line'>        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">results</span><span class="p">[</span><span class="n">use_case</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeit</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">results</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">print_measurements</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&#39;Showing results from best to worst:&#39;</span>
+</span><span class='line'>    <span class="n">sorted_results</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">use_case</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">sorted_results</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">print</span> <span class="s">&#39;  &#39;</span> <span class="o">+</span> <span class="s">&#39;{} took {} seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">use_case</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">best</span> <span class="o">=</span> <span class="n">sorted_results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class='line'>    <span class="n">worst</span> <span class="o">=</span> <span class="n">sorted_results</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&#39;&#39;</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&#39;The best option is &quot;{}&quot;, taking {} seconds&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&#39;The worst option is &quot;{}&quot;, taking {} seconds, which is {} times worse than the best option&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+</span><span class='line'>            <span class="n">worst</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">worst</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">worst</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">measure_all_the_things</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The case that is being tested is particularly interesting for me as this was
+a discussion we had in my team a few weeks ago: using KeyError to handle the
+case when a given key does not exists in a dictionary.</p>
+
+<p>Running the experiment I got the following output:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">time</span> ./using_exceptions_for_control_flow.py
+</span><span class='line'>Measuring times....
+</span><span class='line'>Showing results from best to worst:
+</span><span class='line'>  Checking keys took 0.170432090759 seconds
+</span><span class='line'>  Using default value took 0.18324804306 seconds
+</span><span class='line'>  Handling none manually took 0.194980859756 seconds
+</span><span class='line'>  Using exceptions took 1.26372909546 seconds
+</span><span class='line'>
+</span><span class='line'>The best option is <span class="s2">&quot;checking keys&quot;</span>, taking 0.170432090759 seconds
+</span><span class='line'>The worst option is <span class="s2">&quot;using exceptions&quot;</span>, taking 1.26372909546 seconds, which is 7.41485415 <span class="nb">times </span>worse than the best option
+</span><span class='line'>./using_exceptions_for_control_flow.py  1.87s user 0.00s system 99% cpu 1.880 total
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>It is slow, but that is not the point</h3>
+
+<p>Using exceptions adds a second of execution time in 1.000.000 iterations. This is
+clearly more time, depending on the host where this script is being run it
+can take between 5 to 8 times more time using exceptions to check that a
+given key exists in a dictionary.</p>
+
+<p>The fastest runtime execution belongs to checking against the set of keys, which
+makes me wonder why is the <em>get</em> slower, but let&rsquo;s ignore that for now as the difference
+is really insignificant.</p>
+
+<p>But this is not the point, execution time is more a Guido&rsquo;s problem than mine as
+this benchmark is just a toy benchmark to check the cost of using exceptions.
+If I run this benchmark using a more <em>real worl</em> sample, where the code was failing
+if the key did not existed in the dictionary with, um, an exception; the difference
+dilutes.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># ...</span>
+</span><span class='line'><span class="n">use_cases</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;using exceptions&#39;</span><span class="p">,</span> <span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span class='line'><span class="s">        d = {}</span>
+</span><span class='line'><span class="s">        try:</span>
+</span><span class='line'><span class="s">            try:</span>
+</span><span class='line'><span class="s">                v = d[&#39;key&#39;]</span>
+</span><span class='line'><span class="s">            except KeyError:</span>
+</span><span class='line'><span class="s">                raise ValueError, &quot;key is required&quot;</span>
+</span><span class='line'><span class="s">        except ValueError:</span>
+</span><span class='line'><span class="s">            pass</span>
+</span><span class='line'><span class="s">        &quot;&quot;&quot;</span><span class="p">)))</span>
+</span><span class='line'><span class="n">use_cases</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;checking keys&#39;</span><span class="p">,</span> <span class="n">dedent</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="se">\</span>
+</span><span class='line'><span class="s">        d = {}</span>
+</span><span class='line'><span class="s">        try:</span>
+</span><span class='line'><span class="s">            if not &#39;key&#39; in d.keys():</span>
+</span><span class='line'><span class="s">                raise ValueError, &quot;key is required&quot;</span>
+</span><span class='line'><span class="s">        except ValueError:</span>
+</span><span class='line'><span class="s">            pass</span>
+</span><span class='line'><span class="s">        &quot;&quot;&quot;</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Showing results from best to worst:
+</span><span class='line'>  Checking keys took 1.18252801895 seconds
+</span><span class='line'>  Using exceptions took 2.05906200409 seconds
+</span><span class='line'>
+</span><span class='line'>The best option is <span class="s2">&quot;checking keys&quot;</span>, taking 1.18252801895 seconds
+</span><span class='line'>The worst option is <span class="s2">&quot;using exceptions&quot;</span>, taking 2.05906200409 seconds, which is 1.74123739234 <span class="nb">times </span>worse than the best option
+</span><span class='line'>./using_exceptions_for_control_flow_agressively.py  3.28s user 0.02s system 99% cpu 3.305 total
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In this second case we are already using exceptions to control the flow, checking <code>preconditions</code>,
+telling the caller that the arguments he sent in are not ok. And this case is slow already.</p>
+
+<p>But still, handling the KeyError is twice as slow as checking the existence of the key in the set.</p>
+
+<h2>Conclusions</h2>
+
+<p>Regarding performance, It really doesn&rsquo;t matter.</p>
+
+<p>Is one slower than the others? yes, but all executions grow linearly
+(I&rsquo;ve tested with more iterations) so there is no real reason why
+you should prefer one over the other purely based on performance.</p>
+
+<p>My only preference would go for code clarity, python does not have Ruby&rsquo;s
+procs. That is a real disadvantage as it allows you to write a really compact form
+of <em>failing on missing argument</em>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:key</span><span class="p">)</span> <span class="p">{</span> <span class="nb">fail</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s2">&quot;Key is required&quot;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In python you are forced to write something like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;key&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Key is required&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or whatever variant you want to pick, where implementing a function that wraps all the validation
+is usually an interesting idea as it will keep code compact.</p>
+
+<p>In any case I still prefer to not start a method with <code>try: ... except: ...</code> unless that is all the
+method does. Simply because doing it so forces the reader to start from the error handling, not
+focusing on understanding what the method is supposed to do.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Authored by <span class="fn">Pablo Carranza</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-03T18:16:02-04:00" pubdate data-updated="true">2015-05-03</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://pcarranza.github.io/blog/2015/05/03/using-exceptions-for-flow-control/" data-via="pscarranza" data-counturl="http://pcarranza.github.io/blog/2015/05/03/using-exceptions-for-flow-control/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/12/29/understanding-mysql-degradation/" title="Previous Post: Understanding MySql Degradation">&laquo; Understanding MySql Degradation</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Pablo Carranza -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'pcarranza';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pcarranza.github.io/blog/2015/05/03/using-exceptions-for-flow-control/';
+        var disqus_url = 'http://pcarranza.github.io/blog/2015/05/03/using-exceptions-for-flow-control/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

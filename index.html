@@ -9,8 +9,9 @@
   <meta name="author" content="Pablo Carranza">
 
   
-  <meta name="description" content="This post is neither about magical configurations, nor about baremetal IO ops,
-nor about if you should move your database server to SSD. Neither it &hellip;">
+  <meta name="description" content="While reading Avdi Grimm&rsquo;s Exceptional Ruby he mentions: Are Ruby Exceptions slow?1
+2
+Raising an exception is typically an expensive operation &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,6 +83,61 @@ nor about if you should move your database server to SSD. Neither it &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/03/using-exceptions-for-flow-control/">Using Exceptions for Flow Control</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-03T18:16:02-04:00" pubdate data-updated="true">2015-05-03</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>While reading Avdi Grimm&rsquo;s <strong>Exceptional Ruby</strong> he mentions:</p>
+
+<figure class='code'><figcaption><span>Are Ruby Exceptions slow?</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>Raising an exception is typically an expensive operation in any language,
+</span><span class='line'>and Ruby is no, um, exception
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Well, Python probably is no, um, exception neither.</p>
+
+<p>A few weeks ago I was discussing about using exceptions for flow control myself
+with my team. Probably influenced by <strong>Confident Ruby</strong> from the same author I
+only like to see exception handling on the bottom edge of a method, not in the
+middle.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/05/03/using-exceptions-for-flow-control/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
