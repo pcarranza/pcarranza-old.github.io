@@ -9,9 +9,7 @@
   <meta name="author" content="Pablo Carranza">
 
   
-  <meta name="description" content="While reading Avdi Grimm&rsquo;s Exceptional Ruby he mentions: Are Ruby Exceptions slow?1
-2
-Raising an exception is typically an expensive operation &hellip;">
+  <meta name="description" content="While reading Avdi Grimm&rsquo;s Exceptional Ruby he mentions: Are Ruby Exceptions slow? Raising an exception is typically an expensive operation in &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -113,12 +111,10 @@ Raising an exception is typically an expensive operation &hellip;">
 
 <div class="entry-content"><p>While reading Avdi Grimm&rsquo;s <strong>Exceptional Ruby</strong> he mentions:</p>
 
-<figure class='code'><figcaption><span>Are Ruby Exceptions slow?</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='text'><span class='line'>Raising an exception is typically an expensive operation in any language,
-</span><span class='line'>and Ruby is no, um, exception
-</span></code></pre></td></tr></table></div></figure>
+<p><em>Are Ruby Exceptions slow?</em></p>
 
+<blockquote><p>Raising an exception is typically an expensive operation in any language,
+and Ruby is no, um, exception</p></blockquote>
 
 <p>Well, Python probably is no, um, exception neither.</p>
 
@@ -130,25 +126,28 @@ middle.</p>
 <!--more-->
 
 
-<p>If I find an exception being catched in the middle of a method while performing a
-code review I will request the code writer to extract that exception handling to
-another method and to name it in a way that is showing a clear intent.</p>
+<p>If I find an exception being catched in the middle of a method while
+performing a code review I will request the code writer to extract that
+exception handling to another method and to name it in a way that is showing a
+clear intent.</p>
 
-<p>I think that exceptions are for exceptional situations, and should not be used
-for handling the regular flow of the code. In fact, the less you catch exceptions,
-the better. Because catching those is expensive enough, both for the cognitive
-understanding of the reader, who is dragged out from the regular narrative of the
-method, and for the system itself.</p>
+<p>I personally think that exceptions should be reserved for exceptional
+situations. And should not be used for handling the regular flow of the code.
+In fact, the less you catch exceptions, the better. Because catching those is
+expensive enough, both for the cognitive understanding of the reader, who is
+dragged out from the regular narrative of the method, and for the system
+itself.</p>
 
 <p>But this assertion from Avdi sparked my curiosity.</p>
 
 <h3>How slow is slow?</h3>
 
-<p>You could never tell without measurements, my gut feeling is that using exceptions
-should involve a whole subsystem, but I have no idea how bad that should be.</p>
+<p>You could never tell without measurements, my gut feeling is that using
+exceptions should involve a whole subsystem, but I have no idea how bad that
+should be.</p>
 
-<p>So let&rsquo;s play, let&rsquo;s write some equivalent code and measure which one is slower, and
-let&rsquo;s try to figure out why.</p>
+<p>So let&rsquo;s play, let&rsquo;s write some equivalent code and measure which one is
+slower, and let&rsquo;s try to figure out why.</p>
 
 <h3> The experiment</h3>
 
@@ -226,6 +225,8 @@ let&rsquo;s try to figure out why.</p>
 <span class='line-number'>70</span>
 <span class='line-number'>71</span>
 <span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
 </pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c">#!/usr/bin/env python</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="nn">sys</span>
@@ -270,16 +271,13 @@ let&rsquo;s try to figure out why.</p>
 </span><span class='line'>
 </span><span class='line'>
 </span><span class='line'><span class="k">def</span> <span class="nf">measure_execution_times</span><span class="p">(</span><span class="n">use_cases</span><span class="p">):</span>
-</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;Measuring times&quot;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">write_and_flush</span><span class="p">(</span><span class="s">&quot;Measuring times&quot;</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
 </span><span class='line'>    <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">use_cases</span><span class="p">:</span>
 </span><span class='line'>        <span class="n">use_case</span><span class="p">,</span> <span class="n">code</span> <span class="o">=</span> <span class="n">test</span>
-</span><span class='line'>        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
-</span><span class='line'>        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">write_and_flush</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
 </span><span class='line'>        <span class="n">results</span><span class="p">[</span><span class="n">use_case</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeit</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">write_and_flush</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">return</span> <span class="n">results</span>
 </span><span class='line'>
 </span><span class='line'>
@@ -296,13 +294,18 @@ let&rsquo;s try to figure out why.</p>
 </span><span class='line'>            <span class="n">worst</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">worst</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">worst</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 </span><span class='line'>
 </span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">write_and_flush</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>
 </span><span class='line'><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
 </span><span class='line'>    <span class="n">measure_all_the_things</span><span class="p">()</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>The case that is being tested is particularly interesting for me as this was
-a discussion we had in my team a few weeks ago: using KeyError to handle the
+<p>The case that is being tested is particularly interesting for me as this was a
+discussion we had in my team a few weeks ago: using <code>KeyError</code> to handle the
 case when a given key does not exists in a dictionary.</p>
 
 <p>Running the experiment I got the following output:</p>
@@ -334,20 +337,20 @@ case when a given key does not exists in a dictionary.</p>
 
 <h3>It is slow, but that is not the point</h3>
 
-<p>Using exceptions adds a second of execution time in 1.000.000 iterations. This is
-clearly more time, depending on the host where this script is being run it
-can take between 5 to 8 times more time using exceptions to check that a
-given key exists in a dictionary.</p>
+<p>Using exceptions adds a second of execution time in 1.000.000 iterations. This
+is clearly more time, depending on the host where this script is being run it
+can take between 5 to 8 times more time using exceptions to check that a given
+key exists in a dictionary.</p>
 
-<p>The fastest runtime execution belongs to checking against the set of keys, which
-makes me wonder why is the <em>get</em> slower, but let&rsquo;s ignore that for now as the difference
-is really insignificant.</p>
+<p>The fastest runtime execution belongs to checking against the set of keys,
+which makes me wonder why is the <em>get</em> slower, but let&rsquo;s ignore that for now
+as the difference is really insignificant.</p>
 
-<p>But this is not the point, execution time is more a Guido&rsquo;s problem than mine as
-this benchmark is just a toy benchmark to check the cost of using exceptions.
-If I run this benchmark using a more <em>real world</em> sample, where the code was failing
-if the key did not existed in the dictionary with, um, an exception; the difference
-dilutes.</p>
+<p>But this is not the point, execution time is more a Guido&rsquo;s problem than mine
+as this benchmark is just a toy benchmark to check the cost of using
+exceptions. If I run this benchmark using a more <em>real world</em> sample, where a
+function was failing if the key did not existed in the dictionary with, um, an
+exception; the difference dilutes.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -409,29 +412,31 @@ dilutes.</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>In this second case we are already using exceptions to control the flow by checking <em>preconditions</em> and
-telling the caller that the arguments he/she sent in are not Ok. And this case is slow already.</p>
+<p>In this second test we are already using exceptions to control the flow by
+checking <em>preconditions</em> and telling the caller that the arguments he/she sent
+in are not Ok. And this case is slow already.</p>
 
-<p>But still, handling the KeyError is twice as slow as checking the existence of the key in the set.</p>
+<p>But still, handling the KeyError is twice as slow as checking the existence of
+the key in the set.</p>
 
 <h2>Conclusions</h2>
 
 <p>Regarding performance, It really doesn&rsquo;t matter.</p>
 
-<p>Is one slower than the others? yes, but all executions grow linearly
-(I&rsquo;ve tested with more iterations) so there is no real reason why
-you should prefer one over the other purely based on performance.</p>
+<p>Is one slower than the others? yes, but all executions grow linearly (I&rsquo;ve
+tested with more iterations) so there is no real reason why you should prefer
+one over the other purely based on performance.</p>
 
-<p>My only preference would go for code clarity, python does not have Ruby&rsquo;s
-procs. That is a real disadvantage as it allows you to write a really compact form
-of <em>failing on missing argument</em>:</p>
+<p>My only preference is: go for code clarity. Python does not have Ruby&rsquo;s procs.
+That is a real disadvantage as it allows you to write a really compact form of
+<em>failing on missing argument</em>:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:key</span><span class="p">)</span> <span class="p">{</span> <span class="nb">fail</span> <span class="no">ArgumentError</span><span class="p">,</span> <span class="s2">&quot;Key is required&quot;</span> <span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>In python you are forced to write something like:</p>
+<p>Whereas in python you are forced to write something like:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -442,15 +447,18 @@ of <em>failing on missing argument</em>:</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Or whatever variant you want to pick, where implementing a function that wraps all the validation
-is usually an interesting idea as it will keep code compact.</p>
+<p>Or whatever variant you want to pick, where implementing a function that wraps
+all the validation is usually an interesting idea as it will keep code
+compact.</p>
 
-<p>In any case I still prefer to not start a method with <code>try: ... except: ...</code> unless that is all the
-method does. Simply because doing it so forces the reader to start from the error handling, not
-focusing on understanding what the method is supposed to do.</p>
+<p>In any case I still prefer to not start a method with <code>try: ... except: ...</code>
+unless that is all the method does. Simply because doing it so forces the
+reader to start from the error handling, not focusing on understanding what
+the method is supposed to do.</p>
 
-<p>Finally, there is a penalty when using exception, so it makes sense to leave exceptions for real
-exceptional situations.</p>
+<p>Finally, there is a penalty when using exception, so it makes sense to leave
+exceptions for real exceptional situations, and use control flow statements
+for control flow.</p>
 </div>
 
 
