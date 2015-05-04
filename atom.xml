@@ -4,7 +4,7 @@
   <title><![CDATA[Pablo C]]></title>
   <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2015-05-03T19:20:16-04:00</updated>
+  <updated>2015-05-04T12:06:10-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -252,7 +252,7 @@ is really insignificant.</p>
 
 <p>But this is not the point, execution time is more a Guido&rsquo;s problem than mine as
 this benchmark is just a toy benchmark to check the cost of using exceptions.
-If I run this benchmark using a more <em>real worl</em> sample, where the code was failing
+If I run this benchmark using a more <em>real world</em> sample, where the code was failing
 if the key did not existed in the dictionary with, um, an exception; the difference
 dilutes.</p>
 
@@ -316,8 +316,8 @@ dilutes.</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>In this second case we are already using exceptions to control the flow, checking <code>preconditions</code>,
-telling the caller that the arguments he sent in are not ok. And this case is slow already.</p>
+<p>In this second case we are already using exceptions to control the flow by checking <em>preconditions</em> and
+telling the caller that the arguments he/she sent in are not Ok. And this case is slow already.</p>
 
 <p>But still, handling the KeyError is twice as slow as checking the existence of the key in the set.</p>
 
@@ -355,6 +355,9 @@ is usually an interesting idea as it will keep code compact.</p>
 <p>In any case I still prefer to not start a method with <code>try: ... except: ...</code> unless that is all the
 method does. Simply because doing it so forces the reader to start from the error handling, not
 focusing on understanding what the method is supposed to do.</p>
+
+<p>Finally, there is a penalty when using exception, so it makes sense to leave exceptions for real
+exceptional situations.</p>
 ]]></content>
   </entry>
   
