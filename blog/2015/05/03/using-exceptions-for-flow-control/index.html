@@ -116,7 +116,7 @@
 <blockquote><p>Raising an exception is typically an expensive operation in any language,
 and Ruby is no, um, exception</p></blockquote>
 
-<p>Well, Python probably is no, um, exception neither.</p>
+<p>Well, Python probably is no, um, exception either.</p>
 
 <p>A few weeks ago I was discussing about using exceptions for flow control myself
 with my team. Probably influenced by <strong>Confident Ruby</strong> from the same author I
@@ -423,7 +423,7 @@ the key in the set.</p>
 
 <p>Regarding performance, It really doesn&rsquo;t matter.</p>
 
-<p>Is one slower than the others? yes, but all executions grow linearly (I&rsquo;ve
+<p>Is one slower than all the others? Yes, but all executions grow linearly (I&rsquo;ve
 tested with more iterations) so there is no real reason why you should prefer
 one over the other purely based on performance.</p>
 
@@ -454,11 +454,11 @@ compact.</p>
 <p>In any case I still prefer to not start a method with <code>try: ... except: ...</code>
 unless that is all the method does. Simply because doing it so forces the
 reader to start from the error handling, not focusing on understanding what
-the method is supposed to do.</p>
+the method is supposed to do first.</p>
 
 <p>Finally, there is a penalty when using exception, so it makes sense to leave
-exceptions for real exceptional situations, and use control flow statements
-for control flow.</p>
+exceptions for real exceptional situations, and use flow control statements
+for flow control.</p>
 </div>
 
 
