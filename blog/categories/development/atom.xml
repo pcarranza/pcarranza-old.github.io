@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Development | Pablo C]]></title>
+  <link href="http://pcarranza.github.io/blog/categories/development/atom.xml" rel="self"/>
+  <link href="http://pcarranza.github.io/"/>
+  <updated>2015-08-11T18:05:24-04:00</updated>
+  <id>http://pcarranza.github.io/</id>
+  <author>
+    <name><![CDATA[Pablo Carranza]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Surviving the Fear Cycle]]></title>
+    <link href="http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle/"/>
+    <updated>2015-08-11T17:54:00-04:00</updated>
+    <id>http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle</id>
+    <content type="html"><![CDATA[<p>I survived to one of those fear cycles (and I still am surviving)</p>
+
+<p>Probably the summary of how I managed to broke the cycle was accepting the defeat.</p>
+
+<p>The first step was to publicly admit that we didn&rsquo;t knew we were breaking the system, even admitting that we didn&rsquo;t understood the whole system and the features that were included. When we accepted our lack of knowledge we allowed ourselves to be wrong.</p>
+
+<p>We immediately started writing a system test plan with what we knew about the system. All our assumptions in just one place so we could get back there and just double check what we thought was right. This test plan grew as we broke the system when moving forward. Every time we broke something, we got back there and added a new test case of something we didn&rsquo;t knew before.</p>
+
+<p>We also automated the tests that were just too extensive, too boring, or just low hanging fruit. This ended up building brittle tests, but at least that allowed us to double check that things were working as we assumed correctly.</p>
+
+<p>Over time, the testing effort overtook the engineering effort, so we decided to dedicate a whole sprint to automating tests and got it back under control. Just by automating the test plan was enough.</p>
+
+<p>Building confidence back bit by bit until the team felt that we had the situation under control allowed us to rebuild the parts of the system that were bringing most of the pain.</p>
+
+<p>An important thing to mention is that the working environment has a &ldquo;rollback first&rdquo; culture. So every time we broke some functionality, we just rolled back, licked our wounds and started understanding what happened, why, and how do we prevent it from breaking again.</p>
+
+<p>While being in the fear cycle we also accepted the challenge of delivering a big feature. The reason behind taking that challenge was to have an ambitious goal other than just a rewrite to force ourselves into breaking things, and to feel that we were going beyond just maintaining the system, or building the same thing again &ldquo;but this time doing it right&rdquo;.</p>
+
+<p>This fear cycle is indeed a tricky place to be because of the mix of psychological and technical blend. It is hard to fight regressions all the time in legacy systems, and probably what matters the most is to just accept the defeat, and start again, treating the system as a legacy black box that we know nothing about.</p>
+
+<p>There is a really interesting <a href="https://www.youtube.com/watch?v=RrX_28s70ww">talk by Chad Fowler</a> about how they fixed the wunderlist infrastructure, they were just in this fear cycle. Initially they were so scared of breaking anything that they were just not deploying, so the first action was to release until it stopped hurting: &ldquo;if something hurts do it more often&rdquo;, which also applied to my case.</p>
+
+<p>This post was originally posted in Micheal Nygard blog, <a href="http://www.michaelnygard.com/">Wide Awake Developers</a> as a <a href="http://www.michaelnygard.com/blog/2015/07/the-fear-cycle/#comment-2183427841">comment</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>

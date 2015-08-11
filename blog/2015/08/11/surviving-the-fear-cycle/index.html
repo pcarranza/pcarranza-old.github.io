@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Surviving the Fear Cycle - Pablo C</title>
+  <meta name="author" content="Pablo Carranza">
+
+  
+  <meta name="description" content="I survived to one of those fear cycles (and I still am surviving) Probably the summary of how I managed to broke the cycle was accepting the defeat. &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Pablo C" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='//fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='//fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-55532910-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Pablo C</a></h1>
+  
+    <h2>Seriously curious</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscription">
+  <li><a href="https://github.com/pcarranza" rel="subscribe-github" title="@pcarranza on GitHub">GitHub</a></li>
+</ul>
+  
+  
+  
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Surviving the Fear Cycle</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-11T17:54:00-04:00" pubdate data-updated="true">2015-08-11</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I survived to one of those fear cycles (and I still am surviving)</p>
+
+<p>Probably the summary of how I managed to broke the cycle was accepting the defeat.</p>
+
+<p>The first step was to publicly admit that we didn&rsquo;t knew we were breaking the system, even admitting that we didn&rsquo;t understood the whole system and the features that were included. When we accepted our lack of knowledge we allowed ourselves to be wrong.</p>
+
+<p>We immediately started writing a system test plan with what we knew about the system. All our assumptions in just one place so we could get back there and just double check what we thought was right. This test plan grew as we broke the system when moving forward. Every time we broke something, we got back there and added a new test case of something we didn&rsquo;t knew before.</p>
+
+<p>We also automated the tests that were just too extensive, too boring, or just low hanging fruit. This ended up building brittle tests, but at least that allowed us to double check that things were working as we assumed correctly.</p>
+
+<p>Over time, the testing effort overtook the engineering effort, so we decided to dedicate a whole sprint to automating tests and got it back under control. Just by automating the test plan was enough.</p>
+
+<p>Building confidence back bit by bit until the team felt that we had the situation under control allowed us to rebuild the parts of the system that were bringing most of the pain.</p>
+
+<p>An important thing to mention is that the working environment has a &ldquo;rollback first&rdquo; culture. So every time we broke some functionality, we just rolled back, licked our wounds and started understanding what happened, why, and how do we prevent it from breaking again.</p>
+
+<p>While being in the fear cycle we also accepted the challenge of delivering a big feature. The reason behind taking that challenge was to have an ambitious goal other than just a rewrite to force ourselves into breaking things, and to feel that we were going beyond just maintaining the system, or building the same thing again &ldquo;but this time doing it right&rdquo;.</p>
+
+<p>This fear cycle is indeed a tricky place to be because of the mix of psychological and technical blend. It is hard to fight regressions all the time in legacy systems, and probably what matters the most is to just accept the defeat, and start again, treating the system as a legacy black box that we know nothing about.</p>
+
+<p>There is a really interesting <a href="https://www.youtube.com/watch?v=RrX_28s70ww">talk by Chad Fowler</a> about how they fixed the wunderlist infrastructure, they were just in this fear cycle. Initially they were so scared of breaking anything that they were just not deploying, so the first action was to release until it stopped hurting: &ldquo;if something hurts do it more often&rdquo;, which also applied to my case.</p>
+
+<p>This post was originally posted in Micheal Nygard blog, <a href="http://www.michaelnygard.com/">Wide Awake Developers</a> as a <a href="http://www.michaelnygard.com/blog/2015/07/the-fear-cycle/#comment-2183427841">comment</a>.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Authored by <span class="fn">Pablo Carranza</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-11T17:54:00-04:00" pubdate data-updated="true">2015-08-11</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/development/'>development</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle/" data-via="pscarranza" data-counturl="http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/05/03/using-exceptions-for-flow-control/" title="Previous Post: Using exceptions for flow control">&laquo; Using exceptions for flow control</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Pablo Carranza -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'pcarranza';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle/';
+        var disqus_url = 'http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

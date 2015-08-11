@@ -3,6 +3,12 @@
   
   
   <url>
+    <loc>http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle/</loc>
+    <lastmod>2015-08-11T17:54:00-04:00</lastmod>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
     <loc>http://pcarranza.github.io/blog/2015/05/03/using-exceptions-for-flow-control/</loc>
     <lastmod>2015-05-03T18:16:02-04:00</lastmod>
     <priority>0.8</priority>
@@ -59,14 +65,14 @@
   
   <url>
     <loc>http://pcarranza.github.io/blog/archives/</loc>
-    <lastmod>2015-05-07T12:45:12-04:00</lastmod>
+    <lastmod>2015-08-11T18:05:24-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
     <loc>http://pcarranza.github.io/</loc>
-    <lastmod>2015-05-07T12:45:12-04:00</lastmod>
+    <lastmod>2015-08-11T18:05:24-04:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
