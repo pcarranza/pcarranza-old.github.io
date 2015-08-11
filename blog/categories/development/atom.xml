@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Development | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/development/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2015-08-11T18:05:24-04:00</updated>
+  <updated>2015-08-11T18:06:56-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -40,7 +40,7 @@
 
 <p>There is a really interesting <a href="https://www.youtube.com/watch?v=RrX_28s70ww">talk by Chad Fowler</a> about how they fixed the wunderlist infrastructure, they were just in this fear cycle. Initially they were so scared of breaking anything that they were just not deploying, so the first action was to release until it stopped hurting: &ldquo;if something hurts do it more often&rdquo;, which also applied to my case.</p>
 
-<p>This post was originally posted in Micheal Nygard blog, <a href="http://www.michaelnygard.com/">Wide Awake Developers</a> as a <a href="http://www.michaelnygard.com/blog/2015/07/the-fear-cycle/#comment-2183427841">comment</a>.</p>
+<p>This post was originally posted in Michael Nygard blog, <a href="http://www.michaelnygard.com/">Wide Awake Developers</a> as a <a href="http://www.michaelnygard.com/blog/2015/07/the-fear-cycle/#comment-2183427841">comment</a>.</p>
 ]]></content>
   </entry>
   
