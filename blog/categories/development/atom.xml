@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Development | Pablo C]]></title>
   <link href="http://pcarranza.github.io/blog/categories/development/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2015-08-11T18:06:56-04:00</updated>
+  <updated>2015-08-18T19:04:42-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -18,7 +18,9 @@
     <link href="http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle/"/>
     <updated>2015-08-11T17:54:00-04:00</updated>
     <id>http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle</id>
-    <content type="html"><![CDATA[<p>I survived to one of those fear cycles (and I still am surviving)</p>
+    <content type="html"><![CDATA[<p>This post was originally posted in Michael Nygard blog, <a href="http://www.michaelnygard.com/">Wide Awake Developers</a> as a <a href="http://www.michaelnygard.com/blog/2015/07/the-fear-cycle/#comment-2183427841">comment</a>.</p>
+
+<p>I survived to one of those fear cycles (and I still am surviving)</p>
 
 <p>Probably the summary of how I managed to broke the cycle was accepting the defeat.</p>
 
@@ -39,8 +41,6 @@
 <p>This fear cycle is indeed a tricky place to be because of the mix of psychological and technical blend. It is hard to fight regressions all the time in legacy systems, and probably what matters the most is to just accept the defeat, and start again, treating the system as a legacy black box that we know nothing about.</p>
 
 <p>There is a really interesting <a href="https://www.youtube.com/watch?v=RrX_28s70ww">talk by Chad Fowler</a> about how they fixed the wunderlist infrastructure, they were just in this fear cycle. Initially they were so scared of breaking anything that they were just not deploying, so the first action was to release until it stopped hurting: &ldquo;if something hurts do it more often&rdquo;, which also applied to my case.</p>
-
-<p>This post was originally posted in Michael Nygard blog, <a href="http://www.michaelnygard.com/">Wide Awake Developers</a> as a <a href="http://www.michaelnygard.com/blog/2015/07/the-fear-cycle/#comment-2183427841">comment</a>.</p>
 ]]></content>
   </entry>
   

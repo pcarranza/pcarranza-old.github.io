@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Duplicate Yourself - Pablo C</title>
+  <meta name="author" content="Pablo Carranza">
+
+  
+  <meta name="description" content="Duplication is far cheaper than the wrong abstraction. For quite some time I followed the &ldquo;1, 2, many&rdquo; rule. The first time I heard this &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pcarranza.github.io/blog/2015/08/18/duplicate-yourself">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Pablo C" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='//fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='//fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-55532910-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Pablo C</a></h1>
+  
+    <h2>Seriously curious</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscription">
+  <li><a href="https://github.com/pcarranza" rel="subscribe-github" title="@pcarranza on GitHub">GitHub</a></li>
+</ul>
+  
+  
+  
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Duplicate Yourself</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-18T15:33:01-04:00" pubdate data-updated="true">2015-08-18</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><blockquote><p>Duplication is far cheaper than the wrong abstraction.</p></blockquote>
+
+<p>For quite some time I followed the <strong>&ldquo;1, 2, many&rdquo;</strong> rule.</p>
+
+<p>The first time I heard this was in a talk by someone from Gnome, maybe 10 years ago or so, sadly I just don&rsquo;t remember the name of who he was.</p>
+
+<p>The spirit behind this <em>rule</em> is to be a bit tolerant with code duplication. For example, if you write a bit of code, and you need it in one other place just copy and paste, it&rsquo;s just fine.</p>
+
+<p>Consider creating an abstraction when you find yourself needing it again. This is the <em>many</em> case.</p>
+
+<h3>But shouldn&rsquo;t we avoid duplication at all cost?</h3>
+
+<p>Well, no.</p>
+
+<p>I agree that there is some value in the <strong><a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a></strong> rule. But, again.</p>
+
+<blockquote><p>The first rule we teach novices is don&rsquo;t repeat yourself &ndash; DRY.</p>
+
+<p>But have you ever thought about why we teach them that rule?</p>
+
+<p>It&rsquo;s because they can&rsquo;t understand anything else.</p>
+
+<p>They don&rsquo;t know anything, but by God, they can recognize duplication, and it&rsquo;s a good rule.</p>
+
+<p>I&rsquo;m not saying it&rsquo;s a bad rule, but I&rsquo;m saying that now you&rsquo;re grown up, you know more, and you have enough experience
+now to tolerate a little duplication and wait on a better abstraction.</p>
+
+<p>It&rsquo;s really hard to deal with the wrong abstraction.</p></blockquote>
+
+<p>I get that finding the same code repeated over and over is a smell, that makes sense.</p>
+
+<p>It is just that DRYing everything up front, with no criteria, very easily ends up in writing methods or functions that aims to abstract everything so things are not repeated, so bad, so deeply&hellip; Until you need your abstraction to handle just that one edge case.</p>
+
+<p>So you add <strong>a flag argument</strong>.</p>
+
+<p>This is probably the most common evolution of a <em>way-too-early</em> abstraction.</p>
+
+<p>This takes me back to Clean Code by Robert C. Martin</p>
+
+<blockquote><p>Flag arguments are ugly. Passing a boolean into a function is a truly terrible practice. It
+immediately complicates the signature of the method, loudly proclaiming that this function
+does more than one thing.</p></blockquote>
+
+<p>Which explains why DRYing everything so early and then expanding with flags ends up in a bad design: we kill the single responsibility. Which is the S from <a href="https://en.wikipedia.org/wiki/SOLID_(object-oriented_design)">SOLID</a>.</p>
+
+<p>So just let it go, don&rsquo;t worry that much about repeating yourself, in fact, indulge yourself when repeating code. Let it happen until you see a pattern emerge from the code.</p>
+
+<p>Then just create smaller things, small things you can use to compose one with another. Concepts that are screaming to be extracted out, isolated, simple things that know how to handle just one responsibility.</p>
+
+<p>Please watch <a href="https://www.youtube.com/watch?v=8bZh5LMaSmE">all the little things</a>, by <a href="http://www.sandimetz.com/">Sandi Metz</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Authored by <span class="fn">Pablo Carranza</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-18T15:33:01-04:00" pubdate data-updated="true">2015-08-18</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://pcarranza.github.io/blog/2015/08/18/duplicate-yourself/" data-via="pscarranza" data-counturl="http://pcarranza.github.io/blog/2015/08/18/duplicate-yourself/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/08/11/surviving-the-fear-cycle/" title="Previous Post: Surviving the fear cycle">&laquo; Surviving the fear cycle</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Pablo Carranza -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'pcarranza';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pcarranza.github.io/blog/2015/08/18/duplicate-yourself/';
+        var disqus_url = 'http://pcarranza.github.io/blog/2015/08/18/duplicate-yourself/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

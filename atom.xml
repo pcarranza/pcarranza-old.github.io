@@ -4,7 +4,7 @@
   <title><![CDATA[Pablo C]]></title>
   <link href="http://pcarranza.github.io/atom.xml" rel="self"/>
   <link href="http://pcarranza.github.io/"/>
-  <updated>2015-08-11T18:06:56-04:00</updated>
+  <updated>2015-08-18T19:04:42-04:00</updated>
   <id>http://pcarranza.github.io/</id>
   <author>
     <name><![CDATA[Pablo Carranza]]></name>
@@ -14,11 +14,71 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Duplicate Yourself]]></title>
+    <link href="http://pcarranza.github.io/blog/2015/08/18/duplicate-yourself/"/>
+    <updated>2015-08-18T15:33:01-04:00</updated>
+    <id>http://pcarranza.github.io/blog/2015/08/18/duplicate-yourself</id>
+    <content type="html"><![CDATA[<blockquote><p>Duplication is far cheaper than the wrong abstraction.</p></blockquote>
+
+<p>For quite some time I followed the <strong>&ldquo;1, 2, many&rdquo;</strong> rule.</p>
+
+<p>The first time I heard this was in a talk by someone from Gnome, maybe 10 years ago or so, sadly I just don&rsquo;t remember the name of who he was.</p>
+
+<p>The spirit behind this <em>rule</em> is to be a bit tolerant with code duplication. For example, if you write a bit of code, and you need it in one other place just copy and paste, it&rsquo;s just fine.</p>
+
+<p>Consider creating an abstraction when you find yourself needing it again. This is the <em>many</em> case.</p>
+
+<h3>But shouldn&rsquo;t we avoid duplication at all cost?</h3>
+
+<p>Well, no.</p>
+
+<p>I agree that there is some value in the <strong><a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a></strong> rule. But, again.</p>
+
+<blockquote><p>The first rule we teach novices is don&rsquo;t repeat yourself &ndash; DRY.</p>
+
+<p>But have you ever thought about why we teach them that rule?</p>
+
+<p>It&rsquo;s because they can&rsquo;t understand anything else.</p>
+
+<p>They don&rsquo;t know anything, but by God, they can recognize duplication, and it&rsquo;s a good rule.</p>
+
+<p>I&rsquo;m not saying it&rsquo;s a bad rule, but I&rsquo;m saying that now you&rsquo;re grown up, you know more, and you have enough experience
+now to tolerate a little duplication and wait on a better abstraction.</p>
+
+<p>It&rsquo;s really hard to deal with the wrong abstraction.</p></blockquote>
+
+<p>I get that finding the same code repeated over and over is a smell, that makes sense.</p>
+
+<p>It is just that DRYing everything up front, with no criteria, very easily ends up in writing methods or functions that aims to abstract everything so things are not repeated, so bad, so deeply&hellip; Until you need your abstraction to handle just that one edge case.</p>
+
+<p>So you add <strong>a flag argument</strong>.</p>
+
+<p>This is probably the most common evolution of a <em>way-too-early</em> abstraction.</p>
+
+<p>This takes me back to Clean Code by Robert C. Martin</p>
+
+<blockquote><p>Flag arguments are ugly. Passing a boolean into a function is a truly terrible practice. It
+immediately complicates the signature of the method, loudly proclaiming that this function
+does more than one thing.</p></blockquote>
+
+<p>Which explains why DRYing everything so early and then expanding with flags ends up in a bad design: we kill the single responsibility. Which is the S from <a href="https://en.wikipedia.org/wiki/SOLID_(object-oriented_design)">SOLID</a>.</p>
+
+<p>So just let it go, don&rsquo;t worry that much about repeating yourself, in fact, indulge yourself when repeating code. Let it happen until you see a pattern emerge from the code.</p>
+
+<p>Then just create smaller things, small things you can use to compose one with another. Concepts that are screaming to be extracted out, isolated, simple things that know how to handle just one responsibility.</p>
+
+<p>Please watch <a href="https://www.youtube.com/watch?v=8bZh5LMaSmE">all the little things</a>, by <a href="http://www.sandimetz.com/">Sandi Metz</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Surviving the Fear Cycle]]></title>
     <link href="http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle/"/>
     <updated>2015-08-11T17:54:00-04:00</updated>
     <id>http://pcarranza.github.io/blog/2015/08/11/surviving-the-fear-cycle</id>
-    <content type="html"><![CDATA[<p>I survived to one of those fear cycles (and I still am surviving)</p>
+    <content type="html"><![CDATA[<p>This post was originally posted in Michael Nygard blog, <a href="http://www.michaelnygard.com/">Wide Awake Developers</a> as a <a href="http://www.michaelnygard.com/blog/2015/07/the-fear-cycle/#comment-2183427841">comment</a>.</p>
+
+<p>I survived to one of those fear cycles (and I still am surviving)</p>
 
 <p>Probably the summary of how I managed to broke the cycle was accepting the defeat.</p>
 
@@ -39,8 +99,6 @@
 <p>This fear cycle is indeed a tricky place to be because of the mix of psychological and technical blend. It is hard to fight regressions all the time in legacy systems, and probably what matters the most is to just accept the defeat, and start again, treating the system as a legacy black box that we know nothing about.</p>
 
 <p>There is a really interesting <a href="https://www.youtube.com/watch?v=RrX_28s70ww">talk by Chad Fowler</a> about how they fixed the wunderlist infrastructure, they were just in this fear cycle. Initially they were so scared of breaking anything that they were just not deploying, so the first action was to release until it stopped hurting: &ldquo;if something hurts do it more often&rdquo;, which also applied to my case.</p>
-
-<p>This post was originally posted in Michael Nygard blog, <a href="http://www.michaelnygard.com/">Wide Awake Developers</a> as a <a href="http://www.michaelnygard.com/blog/2015/07/the-fear-cycle/#comment-2183427841">comment</a>.</p>
 ]]></content>
   </entry>
   
